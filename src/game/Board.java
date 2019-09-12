@@ -20,16 +20,19 @@ public class Board {
 	private static final int boardDimension = 8;
 	/* metadata for the board
 	* 								 8 7 6   5 4 3   2   1   0
-	* [0 0 0 0 0 0] [0 0 0] [0 0 0] [0 0 0] [0 0 0] [0] [0] [0]
-	* [U T S R Q P] [O N M] [L K J] [I H G] [F E D] [C] [B] [A]
-	* A: Whether the King's Rook has moved
-	* B: Whether the King has moved
-	* C: Whether the Queen's Rook has moved
+	* [0] [0] [0] [0 0 0 0 0 0] [0 0 0] [0 0 0] [0 0 0] [0 0 0] [0] [0] [0]
+	* [X] [W] [V] [U T S R Q P] [O N M] [L K J] [I H G] [F E D] [C] [B] [A]
+	* A: Whether the White King's Rook has moved
+	* B: Whether the White King has moved
+	* C: Whether the White Queen's Rook has moved
 	* DEF: White King's X Position
 	* GHI: White King's Y Position
 	* JKL: Black King's X Position
 	* MNO: Black King's Y Position
 	* PQRSTU: Number of moves on board since a Piece capture or pawn move
+	* V: Whether the Black King's Rook has moved
+	* W: Whether the Black King has Moved
+	* X: Whether the black Queen's rook has moved
 	*/
 	private final int boardMetaData;
 
@@ -52,7 +55,7 @@ public class Board {
 		}
 		return null;
 	}
-	//TODO: Update boardmetadata after a move
+
 	public Board blitheMove(final Move move, final byte[] positionOfPieceToMove) {
 		final byte[][] newBoard = board.clone();
 		final byte[] delta = move.getDeltaPosition();
@@ -63,7 +66,7 @@ public class Board {
 		final int newY = oldY + delta[1];
 		final byte pieceMoving = newBoard[oldX][oldY];
 		final byte sideMoving = Utility.getSign(pieceMoving);
-		int newBoardMetaData = boardMetaData;
+		int newBoardMetaData = -1;
 		byte numMoves = (byte) Math.max(getMovesSinceBoardStateChange() + 1, 50);
 
 		//if move is a capture or pawn move reset count
@@ -89,20 +92,62 @@ public class Board {
 			newBoard[newX][newY] = (byte) (((PromotionMove) move).promotionId() * sideMoving);
 		}
 		//finish updating metaData
+		//if a king has moved, update that in metadata
+		final byte staticWhiteKingPosition = getKingPositionAsByte(1);
+		final byte staticBlackKingPosition = getKingPositionAsByte(-1);
 		if(Math.abs(pieceMoving) == Piece.kingId) {
 			final byte whiteKingPosition, blackKingPosition;
 			if(sideMoving == 1){
 				whiteKingPosition = positionToByte(new byte[]{(byte) newX, (byte) newY});
-				blackKingPosition = getKingPositionAsByte(-1);
+				blackKingPosition = staticBlackKingPosition;
+				newBoardMetaData = createMetaData((byte) 1, (byte) 1, (byte) 1,
+						whiteKingPosition, blackKingPosition, numMoves, boolToByte(kingsRookMoved(-1)),
+						boolToByte(kingsMoved(-1)), boolToByte(queensRookMoved(-1)));
 			}else {
-				whiteKingPosition = getKingPositionAsByte(1);
+				whiteKingPosition = staticWhiteKingPosition;
 				blackKingPosition = positionToByte(new byte[]{(byte) newX, (byte) newY});
+				newBoardMetaData = createMetaData(boolToByte(kingsRookMoved(1)),
+						boolToByte(kingsMoved(1)), boolToByte(queensRookMoved(1)),
+						whiteKingPosition, blackKingPosition, numMoves, (byte) 1, (byte) 1, (byte) 1);
 			}
-			newBoardMetaData = createMetaData(boolToByte(kingsRookMoved()), (byte) 1, boolToByte(queensRookMoved()),
-					whiteKingPosition, blackKingPosition, numMoves);
+
+		}
+		//if a rook has moved, update that in metadata
+		if(Math.abs(pieceMoving) == Piece.rookId && !kingsMoved(sideMoving)) {
+			if(!kingsRookMoved(sideMoving) && oldX == 0){
+				if(sideMoving == 1) {
+					newBoardMetaData = createMetaData((byte) 1, (byte) 0, boolToByte(queensRookMoved(1)),
+							staticWhiteKingPosition, staticBlackKingPosition, numMoves,
+							boolToByte(kingsRookMoved(-1)), boolToByte(kingsMoved(-1)),
+							boolToByte(queensRookMoved(-1)));
+				} else {
+					newBoardMetaData = createMetaData(boolToByte(kingsRookMoved(1)), (byte) 0,
+							boolToByte(queensRookMoved(1)), staticWhiteKingPosition, staticBlackKingPosition,
+							numMoves, (byte) 1, boolToByte(kingsMoved(-1)),
+							boolToByte(queensRookMoved(-1)));
+				}
+			} else if(!queensRookMoved(sideMoving) && oldX == 7) {
+				if(sideMoving == 1) {
+					newBoardMetaData = createMetaData(boolToByte(kingsRookMoved(1)), (byte) 0, (byte) 1,
+							staticWhiteKingPosition, staticBlackKingPosition, numMoves,
+							boolToByte(kingsRookMoved(-1)), boolToByte(kingsMoved(-1)),
+							boolToByte(queensRookMoved(-1)));
+				} else {
+					newBoardMetaData = createMetaData(boolToByte(kingsRookMoved(1)), (byte) 0,
+							boolToByte(queensRookMoved(1)), staticWhiteKingPosition, staticBlackKingPosition,
+							numMoves, boolToByte(kingsRookMoved(-1)), boolToByte(kingsMoved(-1)),
+							(byte) 1);
+				}
+			}
+		}
+		//if the metadata hasnt otherwise been changed, set it to be the same, with numMoves updated
+		if(newBoardMetaData == -1) {
+			newBoardMetaData = createMetaData(boolToByte(kingsRookMoved(1)), boolToByte(kingsMoved(1)),
+					boolToByte(queensRookMoved(1)), staticWhiteKingPosition, staticBlackKingPosition, numMoves,
+					boolToByte(kingsRookMoved(-1)), boolToByte(kingsMoved(-1)), boolToByte(queensRookMoved(-1)));
 		}
 
-		return new Board(newBoard, boardMetaData);
+		return new Board(newBoard, newBoardMetaData);
 	}
 
 	public boolean canApplyMove(final Move move, final byte[] positionOfPieceToMove, final byte pieceIdValidation) {
@@ -120,6 +165,7 @@ public class Board {
 		}
 		byte pieceValue = board[oldX][oldY];
 		byte moveToValue = board[newX][newY];
+		final byte sideMoving = Utility.getSign(pieceValue);
 		if(pieceValue != pieceIdValidation){
 			Logger.log("Did not find Piece ID: " + pieceIdValidation +
 					" at position [" + oldX + " , " + oldY + "] instead found ID: " + pieceValue);
@@ -131,15 +177,15 @@ public class Board {
 		}
 
 		if(move.isCastle()) {
-			if (kingsMoved()) {
+			if (kingsMoved(sideMoving)) {
 				return false;
 			}
 			if (directionX == -1) {
-				if (queensRookMoved()) {
+				if (queensRookMoved(sideMoving)) {
 					return false;
 				}
 			} else {
-				if (kingsRookMoved()) {
+				if (kingsRookMoved(sideMoving)) {
 					return false;
 				}
 			}
@@ -164,7 +210,6 @@ public class Board {
 		}
 
 		//TODO: Move and then check if king can be taken
-		//TODO: Store position of king
 
 		return true;
 	}
@@ -177,16 +222,28 @@ public class Board {
 		return board.length;
 	}
 
-	public boolean kingsRookMoved() {
-		return (boardMetaData & 1) == 1;
+	public boolean kingsRookMoved(final int side) {
+		if(side == 1) {
+			return (boardMetaData & 1) == 1;
+		} else {
+			return ((boardMetaData >> 21) & 1) == 1;
+		}
 	}
 
-	public boolean kingsMoved() {
-		return ((boardMetaData >> 1) & 1) == 1;
+	public boolean kingsMoved(final int side) {
+		if(side == 1) {
+			return ((boardMetaData >> 1) & 1) == 1;
+		}else {
+			return ((boardMetaData >> 22) & 1) == 1;
+		}
 	}
 
-	public boolean queensRookMoved() {
-		return ((boardMetaData >> 2) & 1) == 1;
+	public boolean queensRookMoved(final int side) {
+		if(side == 1) {
+			return ((boardMetaData >> 2) & 1) == 1;
+		} else {
+			return ((boardMetaData >> 23) & 1) == 1;
+		}
 	}
 
 	public byte[] getKingPosition(final int side) {
@@ -201,9 +258,11 @@ public class Board {
 		return (byte) ((boardMetaData >> 15) & 63);
 	}
 
-	public int createMetaData(final byte kingsRookMoved, final byte kingMoved, final byte queensRookMoved,
-							 final byte whiteKingPosition, final byte blackKingPosition, final byte movesSinceBoardstateChange) {
-		return  (kingsRookMoved + (kingMoved << 1) + (queensRookMoved << 2) + (whiteKingPosition << 3) + (blackKingPosition << 9) + (movesSinceBoardstateChange << 15));
+	public int createMetaData(final byte whiteKingsRookMoved, final byte whiteKingMoved, final byte whiteQueensRookMoved,
+							  final byte whiteKingPosition, final byte blackKingPosition, final byte movesSinceBoardStateChange,
+							  final byte blackKingsRookMoved, final byte blackKingMoved, final byte blackQueensRookMoved) {
+		return  (whiteKingsRookMoved + (whiteKingMoved << 1) + (whiteQueensRookMoved << 2) + (whiteKingPosition << 3) + (blackKingPosition << 9)
+				+ (movesSinceBoardStateChange << 15)) + (blackKingsRookMoved << 21) + (blackKingMoved << 22) + (blackQueensRookMoved << 23);
 	}
 
 	private byte getKingPositionAsByte(final int side) {
