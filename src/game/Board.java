@@ -4,8 +4,10 @@ import debug.Logger;
 import debug.Utility;
 import game.moves.EnPassantMove;
 import game.moves.Move;
+import game.moves.PromotionMove;
 import game.pieces.Piece;
-import jdk.jshell.execution.Util;
+
+import static debug.Utility.boolToByte;
 
 import java.util.Arrays;
 
@@ -59,19 +61,47 @@ public class Board {
 		final int oldY = positionOfPieceToMove[1];
 		final int newX = oldX + delta[0];
 		final int newY = oldY + delta[1];
+		final byte pieceMoving = newBoard[oldX][oldY];
+		final byte sideMoving = Utility.getSign(pieceMoving);
+		int newBoardMetaData = boardMetaData;
+		byte numMoves = (byte) Math.max(getMovesSinceBoardStateChange() + 1, 50);
+
+		//if move is a capture or pawn move reset count
+		if(Math.abs(pieceMoving) == Piece.pawnId || newBoard[newX][newY] != Piece.emptyId){
+			numMoves = 0;
+		}
+		//actually move
 		newBoard[newX][newY] = newBoard[oldX][oldY];
 		newBoard[oldX][oldY] = Piece.emptyId;
+		//
 		if(move.isCastle()) { //If castle, must also move the rook
 			final int rookOldX = directionX == -1 ? 0 : getBoardDimension()-1;
 			final int rookNewX = newX + -directionX;
 			final int rookY = newY;
 			newBoard[rookNewX][rookY] = newBoard[rookOldX][rookY];
 			newBoard[rookOldX][rookY]= Piece.emptyId;
-		} else if(move.isEnPassantCapture()) {
+		} else if(move.isEnPassantCapture()) { // if en passant, make sure to take the pawn
 			final EnPassantMove enPassantMove = (EnPassantMove) move;
 			final byte[] pawnCapturePosition = enPassantMove.getPawnCapturePosition();
 			newBoard[pawnCapturePosition[0]][pawnCapturePosition[1]] = Piece.emptyId;
+			numMoves = 0;
+		} else if(move.isPromotionMove()) { //if is promotion, replace pawn with promoted Piece
+			newBoard[newX][newY] = (byte) (((PromotionMove) move).promotionId() * sideMoving);
 		}
+		//finish updating metaData
+		if(Math.abs(pieceMoving) == Piece.kingId) {
+			final byte whiteKingPosition, blackKingPosition;
+			if(sideMoving == 1){
+				whiteKingPosition = positionToByte(new byte[]{(byte) newX, (byte) newY});
+				blackKingPosition = getKingPositionAsByte(-1);
+			}else {
+				whiteKingPosition = getKingPositionAsByte(1);
+				blackKingPosition = positionToByte(new byte[]{(byte) newX, (byte) newY});
+			}
+			newBoardMetaData = createMetaData(boolToByte(kingsRookMoved()), (byte) 1, boolToByte(queensRookMoved()),
+					whiteKingPosition, blackKingPosition, numMoves);
+		}
+
 		return new Board(newBoard, boardMetaData);
 	}
 
@@ -167,7 +197,7 @@ public class Board {
 		return kingPosition;
 	}
 
-	public byte getMovesSinceBoardstateChange() {
+	public byte getMovesSinceBoardStateChange() {
 		return (byte) ((boardMetaData >> 15) & 63);
 	}
 

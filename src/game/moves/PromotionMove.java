@@ -6,6 +6,7 @@ public class PromotionMove extends Move{
 
 	public PromotionMove(final byte[] deltaPosition, final byte promotionId) {
 		super(deltaPosition);
+		this.setIsPromotionMove();
 		this.promotionId = promotionId;
 	}
 

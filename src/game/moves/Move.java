@@ -14,6 +14,7 @@ public class Move {
 	private boolean isEnPassantCapture;
 	private boolean isDoublePawnMove;
 	private boolean isExclusiveCaptureMove;
+	private boolean isPromotionMove;
 
 	public Move(final byte[] deltaPosition){
 		this(deltaPosition, false);
@@ -25,6 +26,7 @@ public class Move {
 		this.isEnPassantCapture = false;
 		this.isDoublePawnMove = false;
 		this.isExclusiveCaptureMove = false;
+		this.isPromotionMove = false;
 	}
 
 	public byte[] getDeltaPosition() {
@@ -43,6 +45,10 @@ public class Move {
 		this.isExclusiveCaptureMove = true;
 	}
 
+	void setIsPromotionMove() {
+		this.isPromotionMove = true;
+	}
+
 	public boolean isCastle() {
 		return isCastle;
 	}
@@ -57,6 +63,10 @@ public class Move {
 
 	public boolean isExclusiveCaptureMove() {
 		return isExclusiveCaptureMove;
+	}
+
+	public boolean isPromotionMove() {
+		return isPromotionMove;
 	}
 
 
