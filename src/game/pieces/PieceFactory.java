@@ -105,7 +105,7 @@ public class PieceFactory {
 	}
 
 
-	public List<Move> getPieceMoves(byte id) {
+	public static List<Move> getPieceMoves(final byte id) {
 		if(!pieceMap.containsKey(id)){
 			return null;
 		}

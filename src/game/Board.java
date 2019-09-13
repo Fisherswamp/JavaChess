@@ -6,10 +6,12 @@ import game.moves.EnPassantMove;
 import game.moves.Move;
 import game.moves.PromotionMove;
 import game.pieces.Piece;
+import game.pieces.PieceFactory;
 
 import static debug.Utility.boolToByte;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class Board {
 	/* a 2d array of bytes representing the board*/
@@ -157,10 +159,7 @@ public class Board {
 		final byte directionX = Utility.getSign(delta[0]);
 		final int newX = oldX + delta[0];
 		final int newY = oldY + delta[1];
-		if(newX < 0 || newX >= getBoardDimension()){
-			return false;
-		}
-		if(newY < 0 || newY >= getBoardDimension()){
+		if(!isWithinBoard(newX, newY)) {
 			return false;
 		}
 		byte pieceValue = board[oldX][oldY];
@@ -192,7 +191,7 @@ public class Board {
 			//check if castling through, or out of check (not allowed). into check will be checked at the end
 			byte xPosition = oldX;
 			while (xPosition != newX) {
-				if (isPositionInChecK(new byte[]{xPosition, oldY})) {
+				if (isPositionInCheck(new byte[]{xPosition, oldY}, sideMoving)) {
 					return false;
 				}
 				xPosition += directionX;
@@ -209,14 +208,77 @@ public class Board {
 			return false;
 		}
 
-		//TODO: Move and then check if king can be taken
+		Board boardWithMove = blitheMove(move, positionOfPieceToMove);
+		if(boardWithMove.isPositionInCheck(boardWithMove.getKingPosition(sideMoving), sideMoving)){
+			return false;
+		}
 
 		return true;
 	}
 
-	public boolean isPositionInChecK(final byte[] position){
+	public boolean isPositionInCheck(final byte[] position, final byte side){
+		//check if knight can take position
+		List<Move> knightMoves = PieceFactory.getPieceMoves(Piece.knightId);
+		for(Move move : knightMoves) {
+			final byte[] delta = move.getDeltaPosition();
+			final byte[] knightPos = new byte[] {(byte) (position[0] + delta[0]), (byte) (position[1] + delta[1])};
+			if(isWithinBoard(knightPos[0], knightPos[1])) {
+				if(board[knightPos[0]][knightPos[1]] == -side*Piece.knightId){
+					return true;//in check from a knight
+				}
+			}
+		}
+		//check if bishop, queen, or rook can take position
+		for(byte piece : new byte[]{Piece.bishopId, Piece.rookId}){
+			List<Move> moveList = PieceFactory.getPieceMoves(piece);
+			for(Move move : moveList) {
+				final byte[] trueDelta = new byte[]{Utility.getSign(move.getDeltaPosition()[0]), Utility.getSign(move.getDeltaPosition()[1])};
+				byte[] currentPosition = new byte[]{position[0],position[1]};
+				byte currentPiece = board[currentPosition[0]][currentPosition[1]];
+				do {
+					currentPosition[0] += trueDelta[0];
+					currentPosition[1] += trueDelta[1];
+					if(!isWithinBoard(currentPosition[0], currentPosition[1])){
+						break;
+					}
+					currentPiece = board[currentPosition[0]][currentPosition[1]];
+				} while(currentPiece == Piece.emptyId);
+				//keep going on the current position until you get a non empty square, thats the first piece that it could hit
+				if(currentPiece == -side*piece || currentPiece == -side*Piece.queenId){//if the first piece it could hit can move in the direction of the current piece, then position is in check
+					return true;
+				}
+			}
+		}
+		//check if king can take position
+		List<Move> kingMoves = PieceFactory.getPieceMoves(Piece.kingId);
+		for(Move move : kingMoves) {
+			if(move.isCastle()) {//ignore the castle when checking if position can be taken from a king, as a castle cant be a capture
+				continue;
+			}
+			final byte[] delta = move.getDeltaPosition();
+			final byte[] trueLocation = new byte[]{(byte) (position[0] + delta[0]), (byte) (position[1] + delta[1])};
+			if(isWithinBoard(trueLocation[0], trueLocation[1])){
+				if(board[trueLocation[0]][trueLocation[1]] == -side*Piece.kingId){
+					return true;
+				}
+				if(delta[1] == side && delta[0] != 0){//if a forward diagonal capture, also check pawn
+					if(board[trueLocation[0]][trueLocation[1]] == -side*Piece.pawnId){
+						return true;
+					}
+				}
+			}
+		}
+
 		return false;
 	}
+
+	public boolean isWithinBoard(final int x, final int y) {
+		if(x < 0 || x >= getBoardDimension()){
+			return false;
+		}
+		return y >= 0 && y < getBoardDimension();
+	}
+
 
 	public int getBoardDimension() {
 		return board.length;
