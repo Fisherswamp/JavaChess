@@ -1,15 +1,17 @@
-package game;
+package main.game;
 
-import debug.Logger;
-import debug.Utility;
-import game.moves.EnPassantMove;
-import game.moves.Move;
-import game.moves.PromotionMove;
-import game.pieces.Piece;
-import game.pieces.PieceFactory;
+import main.debug.Logger;
+import main.debug.Utility;
+import main.game.moves.ChessMove;
+import main.game.moves.EnPassantMove;
+import main.game.moves.Move;
+import main.game.moves.PromotionMove;
+import main.game.pieces.Piece;
+import main.game.pieces.PieceFactory;
 
-import static debug.Utility.boolToByte;
+import static main.debug.Utility.boolToByte;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -51,16 +53,81 @@ public class Board {
 		this.boardMetaData = boardMetaData;
 	}
 
-	public Board move(final Move move, final byte[] positionOfPieceToMove, final byte pieceIdValidation){
-		if(canApplyMove(move, positionOfPieceToMove, pieceIdValidation)) {
-			return blitheMove(move, positionOfPieceToMove);
+	public Board move(final ChessMove chessMove, final boolean checkMove){
+		if(checkMove){
+			if(canApplyMove(chessMove)) {
+				return blitheMove(chessMove);
+			}
+			return null;
 		}
-		return null;
+		return blitheMove(chessMove);
 	}
 
-	public Board blitheMove(final Move move, final byte[] positionOfPieceToMove) {
+	public List<ChessMove> getLegalMoves(byte side){
+		final List<ChessMove> legalMoves = new ArrayList<>();
+		for(int y = 0; y < board.length; y++){
+			for(int x = 0; x < board[y].length; x++){
+				final byte piece = board[x][y];
+				if(Utility.getSign(piece) != side){
+					continue;
+				}
+				final List<Move> possibleMoves = PieceFactory.getPieceMoves(piece);
+				final byte[] position = new byte[]{(byte) x, (byte) y};
+				getChessMovesFromMoveList(possibleMoves, position, piece).forEach(chessMove -> {
+					if(canApplyMove(chessMove)) {
+						legalMoves.add(chessMove);
+					}
+				});
+			}
+		}
+		return legalMoves;
+	}
+
+	private List<ChessMove> getChessMovesFromMoveList(final List<Move> moveList, final byte[] position, final byte pieceId){
+		List<ChessMove> chessMoveList = new ArrayList<>();
+		moveList.forEach(move -> {
+			final byte[] delta = move.getDeltaPosition();
+			byte[] direction = {0, 0};
+			boolean infinityExists = false;
+			if(Math.abs(delta[0]) == Move.infinity) {
+				direction[0] = Utility.getSign(delta[0]);
+			}
+			if(Math.abs(delta[1]) == Move.infinity) {
+				direction[1] = Utility.getSign(delta[1]);
+			}
+			if(!infinityExists) {
+				chessMoveList.add(new ChessMove(move, position, pieceId, (byte) -1));
+			} else {
+				byte[] currentPosition = {(byte) (position[0] + direction[0]), (byte) (position[1] + direction[1])};
+				byte currentPiece = board[currentPosition[0]][currentPosition[1]];
+				byte amount = 1;
+				while (currentPiece == Piece.emptyId){
+					chessMoveList.add(new ChessMove(move, position, pieceId, amount));
+					amount++;
+					currentPosition[0] += direction[0];
+					currentPosition[1] += direction[1];
+					currentPiece = board[currentPosition[0]][currentPosition[1]];
+				}
+				if(Utility.getSign(currentPiece) == -Utility.getSign(pieceId)){//can end on capture
+					chessMoveList.add(new ChessMove(move, position, pieceId, amount));
+				}
+			}
+		});
+		return chessMoveList;
+	}
+
+	private Board blitheMove(final ChessMove chessMove) {
+		final Move move = chessMove.getMove();
+		final byte[] positionOfPieceToMove = chessMove.getPositionOfPieceToMove();
+
 		final byte[][] newBoard = board.clone();
-		final byte[] delta = move.getDeltaPosition();
+		byte[] delta = move.getDeltaPosition();
+		if(Math.abs(delta[0]) == Move.infinity){
+			delta[0] = chessMove.getMoveAmount();
+		}
+		if(Math.abs(delta[1]) == Move.infinity){
+			delta[1] = chessMove.getMoveAmount();
+		}
 		final byte directionX = Utility.getSign(delta[0]);
 		final int oldX = positionOfPieceToMove[0];
 		final int oldY = positionOfPieceToMove[1];
@@ -152,7 +219,11 @@ public class Board {
 		return new Board(newBoard, newBoardMetaData);
 	}
 
-	public boolean canApplyMove(final Move move, final byte[] positionOfPieceToMove, final byte pieceIdValidation) {
+	private boolean canApplyMove(final ChessMove chessMove) {
+		final Move move = chessMove.getMove();
+		final byte[] positionOfPieceToMove = chessMove.getPositionOfPieceToMove();
+		final byte pieceIdValidation = chessMove.getPieceId();
+
 		final byte oldX = positionOfPieceToMove[0];
 		final byte oldY = positionOfPieceToMove[1];
 		final byte[] delta = move.getDeltaPosition();
@@ -208,7 +279,7 @@ public class Board {
 			return false;
 		}
 
-		Board boardWithMove = blitheMove(move, positionOfPieceToMove);
+		Board boardWithMove = blitheMove(chessMove);
 		if(boardWithMove.isPositionInCheck(boardWithMove.getKingPosition(sideMoving), sideMoving)){
 			return false;
 		}
@@ -216,7 +287,7 @@ public class Board {
 		return true;
 	}
 
-	public boolean isPositionInCheck(final byte[] position, final byte side){
+	private boolean isPositionInCheck(final byte[] position, final byte side){
 		//check if knight can take position
 		List<Move> knightMoves = PieceFactory.getPieceMoves(Piece.knightId);
 		for(Move move : knightMoves) {
@@ -272,7 +343,7 @@ public class Board {
 		return false;
 	}
 
-	public boolean isWithinBoard(final int x, final int y) {
+	private boolean isWithinBoard(final int x, final int y) {
 		if(x < 0 || x >= getBoardDimension()){
 			return false;
 		}
@@ -320,7 +391,7 @@ public class Board {
 		return (byte) ((boardMetaData >> 15) & 63);
 	}
 
-	public int createMetaData(final byte whiteKingsRookMoved, final byte whiteKingMoved, final byte whiteQueensRookMoved,
+	private int createMetaData(final byte whiteKingsRookMoved, final byte whiteKingMoved, final byte whiteQueensRookMoved,
 							  final byte whiteKingPosition, final byte blackKingPosition, final byte movesSinceBoardStateChange,
 							  final byte blackKingsRookMoved, final byte blackKingMoved, final byte blackQueensRookMoved) {
 		return  (whiteKingsRookMoved + (whiteKingMoved << 1) + (whiteQueensRookMoved << 2) + (whiteKingPosition << 3) + (blackKingPosition << 9)

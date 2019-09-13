@@ -1,13 +1,12 @@
-package game.pieces;
+package main.game.pieces;
 
-import game.evaluation.BoardEvaluator;
-import game.moves.DoublePawnMove;
-import game.moves.EnPassantMove;
-import game.moves.ExclusiveCaptureMove;
-import game.moves.Move;
-import game.moves.PromotionMove;
+import main.game.evaluation.BoardEvaluator;
+import main.game.moves.DoublePawnMove;
+import main.game.moves.EnPassantMove;
+import main.game.moves.ExclusiveCaptureMove;
+import main.game.moves.Move;
+import main.game.moves.PromotionMove;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

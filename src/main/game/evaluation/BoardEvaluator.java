@@ -1,4 +1,4 @@
-package game.evaluation;
+package main.game.evaluation;
 
 public class BoardEvaluator {
 

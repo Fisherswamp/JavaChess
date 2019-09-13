@@ -1,8 +1,9 @@
-package game.moves;
+package main.game.moves;
 
-import game.Board;
-import jdk.jshell.spi.ExecutionControl;
-
+/**
+ * @author Itai Fish
+ * Represents a relative move, in other words a change in position
+ */
 public class Move {
 
 	public final static byte infinity = 64;

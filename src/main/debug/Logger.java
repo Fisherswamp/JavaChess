@@ -1,4 +1,4 @@
-package debug;
+package main.debug;
 
 public class Logger {
 
