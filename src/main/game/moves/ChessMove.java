@@ -18,6 +18,10 @@ public class ChessMove {
 		this.moveAmount = moveAmount;
 	}
 
+	public String toString() {
+		return pieceId + ": " + (positionOfPieceToMove[0] + move.getDeltaPosition()[0]) + ", " + (positionOfPieceToMove[1] + move.getDeltaPosition()[1]);
+	}
+
 	public Move getMove() {
 		return move;
 	}

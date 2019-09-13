@@ -120,7 +120,7 @@ public class Board {
 		final Move move = chessMove.getMove();
 		final byte[] positionOfPieceToMove = chessMove.getPositionOfPieceToMove();
 
-		final byte[][] newBoard = board.clone();
+		final byte[][] newBoard = deepCopyBoard(board);
 		byte[] delta = move.getDeltaPosition();
 		if(Math.abs(delta[0]) == Move.infinity){
 			delta[0] = chessMove.getMoveAmount();
@@ -245,7 +245,14 @@ public class Board {
 		if(Utility.getSign(pieceValue) == Utility.getSign(moveToValue)) {
 			return false;
 		}
-
+		//TODO: fix this
+		if(move.isEnPassantCapture()){
+			return false;
+		}
+		//TODO: fix this too
+		if(move.isPromotionMove()){
+			return false;
+		}
 		if(move.isCastle()) {
 			if (kingsMoved(sideMoving)) {
 				return false;
@@ -431,4 +438,11 @@ public class Board {
 		return newBoard;
 	}
 
+	private byte[][] deepCopyBoard(byte[][] board){
+		byte[][] newBoard = new byte[board.length][];
+		for(int i = 0; i < newBoard.length; i++){
+			newBoard[i] = board[i].clone();
+		}
+		return newBoard;
+	}
 }
