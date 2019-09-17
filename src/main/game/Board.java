@@ -91,14 +91,19 @@ public class Board {
 			boolean infinityExists = false;
 			if(Math.abs(delta[0]) == Move.infinity) {
 				direction[0] = Utility.getSign(delta[0]);
+				infinityExists = true;
 			}
 			if(Math.abs(delta[1]) == Move.infinity) {
 				direction[1] = Utility.getSign(delta[1]);
+				infinityExists = true;
 			}
 			if(!infinityExists) {
 				chessMoveList.add(new ChessMove(move, position, pieceId, (byte) -1));
 			} else {
 				byte[] currentPosition = {(byte) (position[0] + direction[0]), (byte) (position[1] + direction[1])};
+				if(!isWithinBoard(currentPosition[0], currentPosition[1])){
+					return;
+				}
 				byte currentPiece = board[currentPosition[0]][currentPosition[1]];
 				byte amount = 1;
 				while (currentPiece == Piece.emptyId){
@@ -106,6 +111,9 @@ public class Board {
 					amount++;
 					currentPosition[0] += direction[0];
 					currentPosition[1] += direction[1];
+					if(!isWithinBoard(currentPosition[0], currentPosition[1])){
+						return;
+					}
 					currentPiece = board[currentPosition[0]][currentPosition[1]];
 				}
 				if(Utility.getSign(currentPiece) == -Utility.getSign(pieceId)){//can end on capture
@@ -249,7 +257,7 @@ public class Board {
 		if(move.isEnPassantCapture()){
 			return false;
 		}
-		//TODO: fix this too
+		//TODO: fix this too and make sure a non promotion pawn move cant get to eighth row
 		if(move.isPromotionMove()){
 			return false;
 		}
@@ -281,9 +289,15 @@ public class Board {
 				return false;
 			}
 		}
-		//can only double pawn move on starting square.
-		if(move.isDoublePawnMove() && oldX != 1 && oldX != 6){
-			return false;
+		//can only double pawn move on starting square, cant double move through piece
+		if(move.isDoublePawnMove()) {
+			if(oldY != 1 && oldY != 6) {
+				return false;
+			}
+			//if position moving through is not empty return false
+			if(board[oldX][oldY + Utility.getSign(delta[1])] != Piece.emptyId) {
+				return false;
+			}
 		}
 
 		Board boardWithMove = blitheMove(chessMove);

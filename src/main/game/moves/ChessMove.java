@@ -1,5 +1,7 @@
 package main.game.moves;
 
+import main.game.pieces.PieceFactory;
+
 /**
  * @author Itai Fish
  * Represents a real-world move, with a Piece moving, and where it moves to
@@ -19,7 +21,9 @@ public class ChessMove {
 	}
 
 	public String toString() {
-		return pieceId + ": " + (positionOfPieceToMove[0] + move.getDeltaPosition()[0]) + ", " + (positionOfPieceToMove[1] + move.getDeltaPosition()[1]);
+		char coordsToLetter[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+
+		return PieceFactory.getPieceName(pieceId) + ": " + (char)('a' + positionOfPieceToMove[0] + move.getDeltaPosition()[0]) + "" + (1 + positionOfPieceToMove[1] + move.getDeltaPosition()[1]);
 	}
 
 	public Move getMove() {
