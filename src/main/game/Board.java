@@ -4,6 +4,7 @@ import main.debug.Logger;
 import main.debug.Utility;
 import main.game.moves.ChessMove;
 import main.game.moves.EnPassantMove;
+import main.game.moves.ExclusiveCapturePromotionMove;
 import main.game.moves.Move;
 import main.game.moves.PromotionMove;
 import main.game.pieces.Piece;
@@ -40,7 +41,7 @@ public class Board {
 	*/
 	private final int boardMetaData;
 
-	public  Board() {
+	public Board() {
 		this(initializedBoard());
 	}
 
@@ -98,7 +99,19 @@ public class Board {
 				infinityExists = true;
 			}
 			if(!infinityExists) {
-				chessMoveList.add(new ChessMove(move, position, pieceId, (byte) -1));
+				if(Math.abs(pieceId) == Piece.pawnId &&
+						position[1] == (Utility.getSign(pieceId) == 1 ? 6 : 1)) {
+					for(byte promotion : new byte[]{Piece.bishopId, Piece.knightId, Piece.rookId, Piece.queenId}) {
+						//copy move over into new move type
+						if(move.isExclusiveCaptureMove()){
+							chessMoveList.add(new ChessMove(new ExclusiveCapturePromotionMove(move.getDeltaPosition(), promotion), position, pieceId, (byte) -1));
+						}else {
+							chessMoveList.add(new ChessMove(new PromotionMove(move.getDeltaPosition(), promotion), position, pieceId, (byte) -1));
+						}
+					}
+				} else {
+					chessMoveList.add(new ChessMove(move, position, pieceId, (byte) -1));
+				}
 			} else {
 				byte[] currentPosition = {(byte) (position[0] + direction[0]), (byte) (position[1] + direction[1])};
 				if(!isWithinBoard(currentPosition[0], currentPosition[1])){
@@ -260,6 +273,8 @@ public class Board {
 		//TODO: fix this too and make sure a non promotion pawn move cant get to eighth row
 		if(move.isPromotionMove()){
 			return false;
+		}else if (Math.abs(pieceValue) == Piece.pawnId){
+			//int byte finalRow = sideMoving == 1 ?
 		}
 		if(move.isCastle()) {
 			if (kingsMoved(sideMoving)) {

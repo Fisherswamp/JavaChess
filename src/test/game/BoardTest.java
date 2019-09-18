@@ -8,6 +8,6 @@ import java.util.stream.Collectors;
 public class BoardTest {
 	public static void main(String[] args) {
 		Board board = new Board();
-		System.out.println(board.getLegalMoves((byte) 1).toString());
+		System.out.println(board.getLegalMoves((byte) 1).size());
 	}
 }

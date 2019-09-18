@@ -42,11 +42,7 @@ public class PieceFactory {
 				new ExclusiveCaptureMove(new byte[]{-1, 1}),
 				new ExclusiveCaptureMove(new byte[]{1, 1}),
 				new EnPassantMove(new byte[]{-1, 1}, new byte[]{-1, 0}),
-				new EnPassantMove(new byte[]{1, 1}, new byte[]{1, 0}),
-				new PromotionMove(new byte[]{0, 1}, Piece.knightId),
-				new PromotionMove(new byte[]{0, 1}, Piece.bishopId),
-				new PromotionMove(new byte[]{0, 1}, Piece.rookId),
-				new PromotionMove(new byte[]{0, 1}, Piece.queenId)
+				new EnPassantMove(new byte[]{1, 1}, new byte[]{1, 0})
 		);
 		final List<Move> blackPawnMoves = Arrays.asList(
 				new Move(new byte[]{0, -1}),
@@ -54,11 +50,7 @@ public class PieceFactory {
 				new ExclusiveCaptureMove(new byte[]{-1, -1}),
 				new ExclusiveCaptureMove(new byte[]{1, -1}),
 				new EnPassantMove(new byte[]{-1, -1}, new byte[]{-1, 0}),
-				new EnPassantMove(new byte[]{1, -1}, new byte[]{1, 0}),
-				new PromotionMove(new byte[]{0, -1}, (byte) -Piece.knightId),
-				new PromotionMove(new byte[]{0, -1}, (byte) -Piece.bishopId),
-				new PromotionMove(new byte[]{0, -1}, (byte) -Piece.rookId),
-				new PromotionMove(new byte[]{0, -1}, (byte) -Piece.queenId)
+				new EnPassantMove(new byte[]{1, -1}, new byte[]{1, 0})
 		);
 		final List<Move> rookMoves = Arrays.asList(
 				new Move(new byte[]{inf, 0}),
