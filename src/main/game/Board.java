@@ -270,12 +270,7 @@ public class Board {
 		if(move.isEnPassantCapture()){
 			return false;
 		}
-		//TODO: fix this too and make sure a non promotion pawn move cant get to eighth row
-		if(move.isPromotionMove()){
-			return false;
-		}else if (Math.abs(pieceValue) == Piece.pawnId){
-			//int byte finalRow = sideMoving == 1 ?
-		}
+
 		if(move.isCastle()) {
 			if (kingsMoved(sideMoving)) {
 				return false;
