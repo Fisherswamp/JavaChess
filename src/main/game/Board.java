@@ -374,6 +374,10 @@ public class Board {
 		return false;
 	}
 
+	public byte getPiece(final int x, final int y) {
+		return board[x][y];
+	}
+
 	private boolean isWithinBoard(final int x, final int y) {
 		if(x < 0 || x >= getBoardDimension()){
 			return false;
