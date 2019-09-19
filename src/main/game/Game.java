@@ -35,4 +35,8 @@ public class Game {
 		return boardStates.get(boardStates.size() - 1);
 	}
 
+	public int getTurn(){
+		return turn;
+	}
+
 }
