@@ -20,7 +20,7 @@ public class Board {
 	/* a 2d array of bytes representing the board*/
 	private final byte[][] board;
 
-	private static final byte defaultMetaData = (byte) ((positionToByte(new byte[]{4, 7}) << 6) + (positionToByte(new byte[]{4, 0})) << 3);
+	private static final int defaultMetaData = (positionToByte(new byte[]{4, 7}) << 9) + (positionToByte(new byte[]{4, 0}) << 3);
 
 	private static final int boardDimension = 8;
 	/* metadata for the board
