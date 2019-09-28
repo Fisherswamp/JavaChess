@@ -5,17 +5,52 @@ import main.game.Game;
 import main.game.moves.ChessMove;
 import main.ui.TextUi;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 public class BoardTest {
 	public static void main(String[] args) {
 		int numIterations = 1000;
-		System.out.printf("Average run time in Parallel: %.6f seconds\n", getAverageRunTimeParallel(numIterations));
-		System.out.printf("Average run time in Series: %.6f seconds\n", getAverageRunTimeSeries(numIterations));
+		//System.out.printf("Average run time in Parallel: %.6f seconds\n", getAverageRunTimeParallel(numIterations));
+		//System.out.printf("Average run time in Series: %.6f seconds\n", getAverageRunTimeSeries(numIterations));
+		System.out.printf("Moves at depth 2: " + getNumMovesAtDepth(2));
 	}
 
-	public static double getAverageRunTimeParallel(int numIterations) {
+	public static long getNumMovesAtDepth(final int depth) {
+		final Game game = new Game();
+		final Board currentBoard = game.getCurrentBoardState();
+		if(depth < 0) {
+			return 0;
+		}
+		if(depth == 0) {
+			return currentBoard.getLegalMoves((byte) 1).size();
+		}
+		final AtomicLong numMoves = new AtomicLong(0l);
+		currentBoard.getLegalMoves((byte) 1).parallelStream().forEach(chessMove -> {
+			final Board board = currentBoard.move(chessMove, false);
+			numMoves.addAndGet(getNumMovesAtDepth(depth - 1, (byte) -1, board));
+		});
+		return numMoves.get();
+	}
+
+	private static long getNumMovesAtDepth(final int depth, final byte side, final Board board) {
+		if(depth <= 0) {
+			return board.getLegalMoves(side).size();
+		}
+
+		final AtomicLong numMoves = new AtomicLong(0l);
+		board.getLegalMoves(side).forEach(chessMove -> {
+			final Board newBoard = board.move(chessMove, false);
+			numMoves.addAndGet(getNumMovesAtDepth(depth - 1, (byte) (side * -1), newBoard ));
+		});
+		return numMoves.get();
+	}
+
+	public static double getAverageRunTimeParallel(final int numIterations) {
 		double averageTime = 0;
 		for(int i = 0; i < numIterations; i++) {
 			long startTime = System.nanoTime();
