@@ -1,6 +1,6 @@
-package game.pieces;
+package main.game.pieces;
 
-import game.moves.Move;
+import main.game.moves.Move;
 
 import java.util.List;
 
@@ -19,13 +19,16 @@ public class Piece {
 	/* numerical value of piece ~Always Positive~ */
 	private final int value;
 
+	/* english name of piece */
+	private final String name;
 	/* List of Piece's legal moves*/
 	private final List<Move> moves;
 
-	public Piece(final byte id, final int pieceValue, final List<Move> moves) {
+	public Piece(final byte id, final int pieceValue, final List<Move> moves, final String name) {
 		this.id = id;
 		this.value = pieceValue;
 		this.moves = moves;
+		this.name = name;
 	}
 
 	public List<Move> getMoves(){
@@ -34,5 +37,9 @@ public class Piece {
 
 	public byte getId() {
 		return id;
+	}
+
+	public String getName() {
+		return name;
 	}
 }

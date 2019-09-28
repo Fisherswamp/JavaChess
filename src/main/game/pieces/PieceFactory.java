@@ -1,13 +1,12 @@
-package game.pieces;
+package main.game.pieces;
 
-import game.evaluation.BoardEvaluator;
-import game.moves.DoublePawnMove;
-import game.moves.EnPassantMove;
-import game.moves.ExclusiveCaptureMove;
-import game.moves.Move;
-import game.moves.PromotionMove;
+import main.game.evaluation.BoardEvaluator;
+import main.game.moves.DoublePawnMove;
+import main.game.moves.EnPassantMove;
+import main.game.moves.ExclusiveCaptureMove;
+import main.game.moves.Move;
+import main.game.moves.PromotionMove;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -43,11 +42,7 @@ public class PieceFactory {
 				new ExclusiveCaptureMove(new byte[]{-1, 1}),
 				new ExclusiveCaptureMove(new byte[]{1, 1}),
 				new EnPassantMove(new byte[]{-1, 1}, new byte[]{-1, 0}),
-				new EnPassantMove(new byte[]{1, 1}, new byte[]{1, 0}),
-				new PromotionMove(new byte[]{0, 1}, Piece.knightId),
-				new PromotionMove(new byte[]{0, 1}, Piece.bishopId),
-				new PromotionMove(new byte[]{0, 1}, Piece.rookId),
-				new PromotionMove(new byte[]{0, 1}, Piece.queenId)
+				new EnPassantMove(new byte[]{1, 1}, new byte[]{1, 0})
 		);
 		final List<Move> blackPawnMoves = Arrays.asList(
 				new Move(new byte[]{0, -1}),
@@ -55,11 +50,7 @@ public class PieceFactory {
 				new ExclusiveCaptureMove(new byte[]{-1, -1}),
 				new ExclusiveCaptureMove(new byte[]{1, -1}),
 				new EnPassantMove(new byte[]{-1, -1}, new byte[]{-1, 0}),
-				new EnPassantMove(new byte[]{1, -1}, new byte[]{1, 0}),
-				new PromotionMove(new byte[]{0, -1}, (byte) -Piece.knightId),
-				new PromotionMove(new byte[]{0, -1}, (byte) -Piece.bishopId),
-				new PromotionMove(new byte[]{0, -1}, (byte) -Piece.rookId),
-				new PromotionMove(new byte[]{0, -1}, (byte) -Piece.queenId)
+				new EnPassantMove(new byte[]{1, -1}, new byte[]{1, 0})
 		);
 		final List<Move> rookMoves = Arrays.asList(
 				new Move(new byte[]{inf, 0}),
@@ -82,21 +73,22 @@ public class PieceFactory {
 		final List<Move> queenMoves = new ArrayList<>(rookMoves);
 		queenMoves.addAll(bishopMoves);
 
-		pieceMap.put((byte) 0, new Piece(Piece.emptyId, 0, new ArrayList<>()));//put the empty piece with no possible moves
-		pieceMap.put(Piece.pawnId, new Piece(Piece.pawnId, BoardEvaluator.pawnValue, whitePawnMoves));
-		pieceMap.put((byte) -Piece.pawnId, new Piece((byte) -Piece.pawnId, -BoardEvaluator.pawnValue, blackPawnMoves));
+		pieceMap.put((byte) 0, new Piece(Piece.emptyId, 0, new ArrayList<>(), "Empty"));//put the empty piece with no possible moves
+		pieceMap.put(Piece.pawnId, new Piece(Piece.pawnId, BoardEvaluator.pawnValue, whitePawnMoves, "WhitePawn"));
+		pieceMap.put((byte) -Piece.pawnId, new Piece((byte) -Piece.pawnId, -BoardEvaluator.pawnValue, blackPawnMoves, "BlackPawn"));
 		Arrays.asList(-1, 1).forEach(
 				side -> {
+					String sideStr = side == 1 ? "White" : "Black";
 					pieceMap.put((byte) (side * Piece.knightId),
-						new Piece((byte) (side * Piece.knightId), side * BoardEvaluator.knightValue, knightMoves));
+						new Piece((byte) (side * Piece.knightId), side * BoardEvaluator.knightValue, knightMoves, sideStr+"Knight"));
 					pieceMap.put((byte) (side * Piece.bishopId),
-							new Piece((byte) (side * Piece.bishopId), side * BoardEvaluator.bishopValue, bishopMoves));
+							new Piece((byte) (side * Piece.bishopId), side * BoardEvaluator.bishopValue, bishopMoves, sideStr+"Bishop"));
 					pieceMap.put((byte) (side * Piece.rookId),
-							new Piece((byte) (side * Piece.rookId), side * BoardEvaluator.rookValue, rookMoves));
+							new Piece((byte) (side * Piece.rookId), side * BoardEvaluator.rookValue, rookMoves, sideStr+"Rook"));
 					pieceMap.put((byte) (side * Piece.queenId),
-							new Piece((byte) (side * Piece.queenId), side * BoardEvaluator.queenValue, queenMoves));
+							new Piece((byte) (side * Piece.queenId), side * BoardEvaluator.queenValue, queenMoves, sideStr+"Queen"));
 					pieceMap.put((byte) (side * Piece.kingId),
-							new Piece((byte) (side * Piece.kingId), side * BoardEvaluator.kingValue, kingMoves));
+							new Piece((byte) (side * Piece.kingId), side * BoardEvaluator.kingValue, kingMoves, sideStr+"King"));
 				}
 
 		);
@@ -105,10 +97,17 @@ public class PieceFactory {
 	}
 
 
-	public List<Move> getPieceMoves(byte id) {
+	public static List<Move> getPieceMoves(final byte id) {
 		if(!pieceMap.containsKey(id)){
 			return null;
 		}
 		return pieceMap.get(id).getMoves();
+	}
+
+	public static String getPieceName(final byte id) {
+		if(!pieceMap.containsKey(id)){
+			return null;
+		}
+		return pieceMap.get(id).getName();
 	}
 }

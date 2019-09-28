@@ -1,4 +1,4 @@
-package game.moves;
+package main.game.moves;
 
 public class DoublePawnMove extends Move{
 
