@@ -1,4 +1,4 @@
-package main.debug;
+package main.java.debug;
 
 public class Utility {
 

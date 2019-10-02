@@ -1,6 +1,6 @@
-package main.game;
+package main.java.game;
 
-import main.game.moves.ChessMove;
+import main.java.game.moves.ChessMove;
 
 import java.util.ArrayList;
 import java.util.List;

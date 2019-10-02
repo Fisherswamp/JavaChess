@@ -1,16 +1,16 @@
-package main.game;
+package main.java.game;
 
-import main.debug.Logger;
-import main.debug.Utility;
-import main.game.moves.ChessMove;
-import main.game.moves.EnPassantMove;
-import main.game.moves.ExclusiveCapturePromotionMove;
-import main.game.moves.Move;
-import main.game.moves.PromotionMove;
-import main.game.pieces.Piece;
-import main.game.pieces.PieceFactory;
+import main.java.debug.Logger;
+import main.java.debug.Utility;
+import main.java.game.moves.ChessMove;
+import main.java.game.moves.EnPassantMove;
+import main.java.game.moves.ExclusiveCapturePromotionMove;
+import main.java.game.moves.Move;
+import main.java.game.moves.PromotionMove;
+import main.java.game.pieces.Piece;
+import main.java.game.pieces.PieceFactory;
 
-import static main.debug.Utility.boolToByte;
+import static main.java.debug.Utility.boolToByte;
 
 import java.util.ArrayList;
 import java.util.Arrays;

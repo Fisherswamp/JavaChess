@@ -1,6 +1,6 @@
-package main.game.moves;
+package main.java.game.moves;
 
-import main.game.pieces.PieceFactory;
+import main.java.game.pieces.PieceFactory;
 
 /**
  * @author Itai Fish

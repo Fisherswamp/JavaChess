@@ -1,4 +1,4 @@
-package main.game.moves;
+package main.java.game.moves;
 
 /**
  * @author Itai Fish

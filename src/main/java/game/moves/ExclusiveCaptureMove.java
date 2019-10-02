@@ -1,4 +1,4 @@
-package main.game.moves;
+package main.java.game.moves;
 
 public class ExclusiveCaptureMove extends Move{
 

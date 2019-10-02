@@ -1,11 +1,10 @@
-package main.game.pieces;
+package main.java.game.pieces;
 
-import main.game.evaluation.BoardEvaluator;
-import main.game.moves.DoublePawnMove;
-import main.game.moves.EnPassantMove;
-import main.game.moves.ExclusiveCaptureMove;
-import main.game.moves.Move;
-import main.game.moves.PromotionMove;
+import main.java.game.evaluation.BoardEvaluator;
+import main.java.game.moves.DoublePawnMove;
+import main.java.game.moves.EnPassantMove;
+import main.java.game.moves.ExclusiveCaptureMove;
+import main.java.game.moves.Move;
 
 import java.util.ArrayList;
 import java.util.Arrays;
