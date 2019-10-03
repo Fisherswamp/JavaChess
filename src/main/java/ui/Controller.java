@@ -45,7 +45,6 @@ public class Controller {
 		if(!canPlayerInteract()){
 			return;
 		}
-		Logger.log("Click at " + boardX + ", " + boardY);
 		final Board board = game.getCurrentBoardState();
 		final Piece pieceClickedOn = getPiece(boardX, boardY);
 		//if you click on another of your own pieces
@@ -55,6 +54,11 @@ public class Controller {
 			}
 			selected = squares[boardX][boardY];
 			selected.setSelected(true);
+			Logger.log(game.getLegalMoves().stream()
+					.filter(chessMove -> {
+						final byte[] startPosition = chessMove.getPositionOfPieceToMove();
+						return (startPosition[0] == selected.getX() && startPosition[1] == selected.getY());
+					}).collect(Collectors.toList()).toString());
 		} else if(selected != null) {
 			Logger.log("Attempting to move");
 			List<ChessMove> relevantMoves = game.getLegalMoves()

@@ -24,7 +24,7 @@ public class ChessMove {
 	}
 
 	private int[] calcNewPosition() {
-		byte[] delta = move.getDeltaPosition();
+		byte[] delta = move.getDeltaPosition().clone();
 		if(Math.abs(delta[0]) == Move.infinity){
 			delta[0] = (byte) (Math.abs(moveAmount) * Utility.getSign(delta[0]));
 		}
@@ -39,7 +39,7 @@ public class ChessMove {
 	public String toString() {
 		char coordsToLetter[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
 
-		return PieceFactory.getPieceName(pieceId) + ": " + (char)('a' + positionOfPieceToMove[0] + move.getDeltaPosition()[0]) + "" + (1 + positionOfPieceToMove[1] + move.getDeltaPosition()[1]);
+		return PieceFactory.getPieceName(pieceId) + ": " + (char)('a' + newPosition[0]) + "" + (1 + newPosition[1]);
 	}
 
 	public Move getMove() {
