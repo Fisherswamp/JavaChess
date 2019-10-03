@@ -10,7 +10,7 @@ public class EnPassantMove extends Move{
 		this.pawnCapturePosition = pawnCapturePosition;
 	}
 
-	public byte[] getPawnCapturePosition() {
+	public byte[] getPawnCaptureDeltaPosition() {
 		return pawnCapturePosition;
 	}
 }

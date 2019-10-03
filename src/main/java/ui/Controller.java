@@ -60,7 +60,6 @@ public class Controller {
 						return (startPosition[0] == selected.getX() && startPosition[1] == selected.getY());
 					}).collect(Collectors.toList()).toString());
 		} else if(selected != null) {
-			Logger.log("Attempting to move");
 			List<ChessMove> relevantMoves = game.getLegalMoves()
 					.stream()
 					.filter(chessMove -> {
