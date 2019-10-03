@@ -1,11 +1,15 @@
 package main.java.game.pieces;
 
+import javafx.scene.image.Image;
+import main.java.debug.Logger;
 import main.java.game.evaluation.BoardEvaluator;
 import main.java.game.moves.DoublePawnMove;
 import main.java.game.moves.EnPassantMove;
 import main.java.game.moves.ExclusiveCaptureMove;
 import main.java.game.moves.Move;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,7 +18,8 @@ import java.util.Map;
 
 public class PieceFactory {
 
-	private static Map<Byte, Piece> pieceMap = initializePieces();
+	private static final Map<Byte, Map<String, Image>> idAndSkinToImageMap = new HashMap<>();
+	private static final Map<Byte, Piece> pieceMap = initializePieces();
 
 	private static Map<Byte, Piece> initializePieces() {
 		final Map<Byte, Piece> pieceMap = new HashMap<>();
@@ -91,7 +96,9 @@ public class PieceFactory {
 				}
 
 		);
-
+		//After pieceMap is initialized, set the keys to idAndSkinToImageMap
+		pieceMap.keySet().forEach(id -> idAndSkinToImageMap.put(id, new HashMap<>()));
+		//
 		return pieceMap;
 	}
 
@@ -108,5 +115,34 @@ public class PieceFactory {
 			return null;
 		}
 		return pieceMap.get(id).getName();
+	}
+
+	public static Piece getPiece(final byte id) {
+		return pieceMap.get(id);
+	}
+
+	public static Image getImage(final byte id, final String skinName) {
+		final Map<String, Image> skinToImageMap = idAndSkinToImageMap.get(id);
+		if(skinToImageMap != null){
+			final Image pieceImage = skinToImageMap.get(skinName);
+			if(pieceImage != null){
+				return  pieceImage;
+			} else {
+				final String url = "main/resources/images/skins/" + skinName + "/" + getPieceName(id) + ".png";
+				try(final InputStream inputStream = PieceFactory.class.getClassLoader().getResourceAsStream(url)) {
+					if(inputStream == null){
+						return null;
+					}
+					final Image loadedPieceImage = new Image(inputStream);
+					skinToImageMap.put(skinName, loadedPieceImage);
+					return loadedPieceImage;
+
+				} catch (IOException e) {
+					Logger.log("Error reading url: " + e);
+					return null;
+				}
+			}
+		}
+		return null;
 	}
 }

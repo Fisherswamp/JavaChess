@@ -10,6 +10,7 @@ public class Game {
 
 	private final List<Board> boardStates;
 	private final List<ChessMove> legalMoves;
+	/* 1 for white, -1 for black */
 	private byte turn;
 
 
