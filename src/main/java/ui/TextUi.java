@@ -1,7 +1,7 @@
-package main.ui;
+package main.java.ui;
 
-import main.game.Board;
-import main.game.pieces.Piece;
+import main.java.game.Board;
+import main.java.game.pieces.Piece;
 
 import java.util.HashMap;
 import java.util.Map;

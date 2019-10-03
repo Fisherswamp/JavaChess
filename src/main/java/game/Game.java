@@ -1,6 +1,7 @@
-package main.game;
+package main.java.game;
 
-import main.game.moves.ChessMove;
+import main.java.game.moves.ChessMove;
+import main.java.game.moves.Move;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,16 +9,21 @@ import java.util.List;
 public class Game {
 
 	private final List<Board> boardStates;
+	private final List<ChessMove> legalMoves;
+	/* 1 for white, -1 for black */
 	private byte turn;
+
 
 	public Game() {
 		this.boardStates = new ArrayList<>();
+		this.legalMoves = new ArrayList<>();
 		this.turn = 1;
 		boardStates.add(new Board());
+		legalMoves.addAll(getCurrentBoardState().getLegalMoves(this.turn));
 	}
 
 	public List<ChessMove> getLegalMoves(){
-		return getCurrentBoardState().getLegalMoves(this.turn);
+		return legalMoves;
 	}
 
 	public boolean move(final ChessMove move) {
@@ -27,6 +33,8 @@ public class Game {
 		} else {
 			turn *= -1;
 			boardStates.add(newBoard);
+			legalMoves.clear();
+			legalMoves.addAll(getCurrentBoardState().getLegalMoves(this.turn));
 			return true;
 		}
 	}

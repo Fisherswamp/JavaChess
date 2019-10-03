@@ -1,6 +1,6 @@
-package main.game.pieces;
+package main.java.game.pieces;
 
-import main.game.moves.Move;
+import main.java.game.moves.Move;
 
 import java.util.List;
 

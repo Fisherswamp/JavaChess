@@ -1,16 +1,16 @@
-package main.game;
+package main.java.game;
 
-import main.debug.Logger;
-import main.debug.Utility;
-import main.game.moves.ChessMove;
-import main.game.moves.EnPassantMove;
-import main.game.moves.ExclusiveCapturePromotionMove;
-import main.game.moves.Move;
-import main.game.moves.PromotionMove;
-import main.game.pieces.Piece;
-import main.game.pieces.PieceFactory;
+import main.java.debug.Logger;
+import main.java.management.Utility;
+import main.java.game.moves.ChessMove;
+import main.java.game.moves.EnPassantMove;
+import main.java.game.moves.ExclusiveCapturePromotionMove;
+import main.java.game.moves.Move;
+import main.java.game.moves.PromotionMove;
+import main.java.game.pieces.Piece;
+import main.java.game.pieces.PieceFactory;
 
-import static main.debug.Utility.boolToByte;
+import static main.java.management.Utility.boolToByte;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -142,18 +142,12 @@ public class Board {
 		final byte[] positionOfPieceToMove = chessMove.getPositionOfPieceToMove();
 
 		final byte[][] newBoard = deepCopyBoard(board);
-		byte[] delta = move.getDeltaPosition();
-		if(Math.abs(delta[0]) == Move.infinity){
-			delta[0] = chessMove.getMoveAmount();
-		}
-		if(Math.abs(delta[1]) == Move.infinity){
-			delta[1] = chessMove.getMoveAmount();
-		}
-		final byte directionX = Utility.getSign(delta[0]);
+		final byte directionX = Utility.getSign(move.getDeltaPosition()[0]);
 		final int oldX = positionOfPieceToMove[0];
 		final int oldY = positionOfPieceToMove[1];
-		final int newX = oldX + delta[0];
-		final int newY = oldY + delta[1];
+		final int[] newPosition = chessMove.getNewPosition();
+		final int newX = newPosition[0];
+		final int newY = newPosition[1];
 		final byte pieceMoving = newBoard[oldX][oldY];
 		final byte sideMoving = Utility.getSign(pieceMoving);
 		int newBoardMetaData = -1;
@@ -249,8 +243,9 @@ public class Board {
 		final byte oldY = positionOfPieceToMove[1];
 		final byte[] delta = move.getDeltaPosition();
 		final byte directionX = Utility.getSign(delta[0]);
-		final int newX = oldX + delta[0];
-		final int newY = oldY + delta[1];
+		final int[] newPosition = chessMove.getNewPosition();
+		final int newX = newPosition[0];
+		final int newY = newPosition[1];
 		if(!isWithinBoard(newX, newY)) {
 			return false;
 		}

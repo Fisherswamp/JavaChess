@@ -1,16 +1,11 @@
 package test.game;
 
-import main.game.Board;
-import main.game.Game;
-import main.game.moves.ChessMove;
-import main.ui.TextUi;
+import main.java.game.Board;
+import main.java.game.Game;
+import main.java.game.moves.ChessMove;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 public class BoardTest {
 	public static void main(String[] args) {
