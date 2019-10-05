@@ -2,8 +2,12 @@ package main.java.game.evaluation;
 
 import main.java.debug.Logger;
 import main.java.game.Board;
+import main.java.game.moves.ChessMove;
+import main.java.game.moves.Move;
 import main.java.game.pieces.Piece;
 import main.java.management.Utility;
+
+import java.util.List;
 
 public class BoardEvaluator {
 
@@ -14,14 +18,23 @@ public class BoardEvaluator {
 	public static final int queenValue = 9;
 	public static final int kingValue = 1000;
 
-	public static double evaluateBoard(final Board board) {
+	public static Evaluation evaluateBoard(final Board board, final byte side, final int depth) {
+		final List<ChessMove> legalMoves = board.getLegalMoves(side);
+		if(legalMoves.isEmpty()) {
+			//Either stalemate or checkmate
+			if(board.isKingInCheck(side)) {
+				return new Evaluation(-side * 1000, true, depth);
+			} else {
+				return new Evaluation(0, true, depth);
+			}
+		}
 		double boardValue = 0;
 		for(byte y = 0; y < board.getBoardDimension(); y++) {
 			for(byte x = 0; x < board.getBoardDimension(); x++){
 				boardValue += evaluatePiece(board.getBoard(), x, y);
 			}
 		}
-		return boardValue;
+		return new Evaluation(boardValue);
 	}
 
 	private static double evaluatePiece(final byte[][] board, final byte x, final byte y) {

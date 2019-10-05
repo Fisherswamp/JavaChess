@@ -274,7 +274,6 @@ public class Board {
 		if(move.isEnPassantCapture()){
 			return getDoublePawnMovePosition() == newX;
 		}
-
 		if(move.isCastle()) {
 			if (kingsMoved(sideMoving)) {
 				return false;
@@ -302,6 +301,11 @@ public class Board {
 			if(moveToValue == Piece.emptyId) {
 				return false;
 			}
+		} else if(Math.abs(pieceValue) == Piece.pawnId) {
+			//Can't be a capture -> must move to empty square
+			if(moveToValue != Piece.emptyId) {
+				return false;
+			}
 		}
 		//can only double pawn move on starting square, cant double move through piece
 		if(move.isDoublePawnMove()) {
@@ -315,11 +319,15 @@ public class Board {
 		}
 
 		Board boardWithMove = blitheMove(chessMove);
-		if(boardWithMove.isPositionInCheck(boardWithMove.getKingPosition(sideMoving), sideMoving)){
+		if(boardWithMove.isKingInCheck(sideMoving)){
 			return false;
 		}
 
 		return true;
+	}
+
+	public boolean isKingInCheck(final byte side) {
+		return isPositionInCheck(getKingPosition(side), side);
 	}
 
 	private boolean isPositionInCheck(final byte[] position, final byte side){

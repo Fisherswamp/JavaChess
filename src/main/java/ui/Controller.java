@@ -3,6 +3,7 @@ package main.java.ui;
 import javafx.scene.image.Image;
 import main.java.debug.Logger;
 import main.java.game.evaluation.BoardEvaluator;
+import main.java.game.evaluation.Evaluation;
 import main.java.management.PropertiesManager;
 import main.java.management.Utility;
 import main.java.game.Board;
@@ -73,7 +74,8 @@ public class Controller {
 					selected.setSelected(false);
 					selected = null;
 					updateChessSquareImages();
-					Logger.log("Evaluation: " + BoardEvaluator.evaluateBoard(game.getCurrentBoardState()));
+					final Evaluation evaluation = BoardEvaluator.evaluateBoard(game.getCurrentBoardState(), (byte) game.getTurn(), 0);
+					Logger.log("Evaluation: " + evaluation.getValue() + "[Game Over: " + evaluation.isGameOver() + "]");
 				} else {
 					throw new RuntimeException("This should never happen");
 				}
