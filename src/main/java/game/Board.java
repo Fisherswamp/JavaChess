@@ -24,9 +24,10 @@ public class Board {
 
 	private static final int boardDimension = 8;
 	/* metadata for the board
-	* 								 8 7 6   5 4 3   2   1   0
-	* [0] [0] [0] [0 0 0 0 0 0] [0 0 0] [0 0 0] [0 0 0] [0 0 0] [0] [0] [0]
-	* [X] [W] [V] [U T S R Q P] [O N M] [L K J] [I H G] [F E D] [C] [B] [A]
+	*						   2					   1
+	*  7 6 5   4   3   2   1   0 9 8 7 6 5   4 3 2   1 0 9   8 7 6   5 4 3   2   1   0
+	* [0 0 0] [0] [0] [0] [0] [0 0 0 0 0 0] [0 0 0] [0 0 0] [0 0 0] [0 0 0] [0] [0] [0]
+	* [b a Z] [Y] [X] [W] [V] [U T S R Q P] [O N M] [L K J] [I H G] [F E D] [C] [B] [A]
 	* A: Whether the White King's Rook has moved
 	* B: Whether the White King has moved
 	* C: Whether the White Queen's Rook has moved
@@ -38,6 +39,8 @@ public class Board {
 	* V: Whether the Black King's Rook has moved
 	* W: Whether the Black King has Moved
 	* X: Whether the black Queen's rook has moved
+	* Y: Whether the last move was a double pawn move
+	* Zab: X Position of last double pawn move
 	*/
 	private final int boardMetaData;
 
@@ -153,6 +156,7 @@ public class Board {
 		int newBoardMetaData = -1;
 		byte numMoves = (byte) Math.max(getMovesSinceBoardStateChange() + 1, 50);
 
+
 		//if move is a capture or pawn move reset count
 		if(Math.abs(pieceMoving) == Piece.pawnId || newBoard[newX][newY] != Piece.emptyId){
 			numMoves = 0;
@@ -169,8 +173,8 @@ public class Board {
 			newBoard[rookOldX][rookY]= Piece.emptyId;
 		} else if(move.isEnPassantCapture()) { // if en passant, make sure to take the pawn
 			final EnPassantMove enPassantMove = (EnPassantMove) move;
-			final byte[] pawnCapturePosition = enPassantMove.getPawnCapturePosition();
-			newBoard[pawnCapturePosition[0]][pawnCapturePosition[1]] = Piece.emptyId;
+			final byte[] pawnCaptureDeltaPosition = enPassantMove.getPawnCaptureDeltaPosition();
+			newBoard[oldX + pawnCaptureDeltaPosition[0]][oldY + pawnCaptureDeltaPosition[1]] = Piece.emptyId;
 			numMoves = 0;
 		} else if(move.isPromotionMove()) { //if is promotion, replace pawn with promoted Piece
 			newBoard[newX][newY] = (byte) (((PromotionMove) move).promotionId() * sideMoving);
@@ -186,13 +190,13 @@ public class Board {
 				blackKingPosition = staticBlackKingPosition;
 				newBoardMetaData = createMetaData((byte) 1, (byte) 1, (byte) 1,
 						whiteKingPosition, blackKingPosition, numMoves, boolToByte(kingsRookMoved(-1)),
-						boolToByte(kingsMoved(-1)), boolToByte(queensRookMoved(-1)));
+						boolToByte(kingsMoved(-1)), boolToByte(queensRookMoved(-1)), (byte) 0, (byte) 0);
 			}else {
 				whiteKingPosition = staticWhiteKingPosition;
 				blackKingPosition = positionToByte(new byte[]{(byte) newX, (byte) newY});
 				newBoardMetaData = createMetaData(boolToByte(kingsRookMoved(1)),
 						boolToByte(kingsMoved(1)), boolToByte(queensRookMoved(1)),
-						whiteKingPosition, blackKingPosition, numMoves, (byte) 1, (byte) 1, (byte) 1);
+						whiteKingPosition, blackKingPosition, numMoves, (byte) 1, (byte) 1, (byte) 1, (byte) 0, (byte) 0);
 			}
 
 		}
@@ -203,32 +207,38 @@ public class Board {
 					newBoardMetaData = createMetaData((byte) 1, (byte) 0, boolToByte(queensRookMoved(1)),
 							staticWhiteKingPosition, staticBlackKingPosition, numMoves,
 							boolToByte(kingsRookMoved(-1)), boolToByte(kingsMoved(-1)),
-							boolToByte(queensRookMoved(-1)));
+							boolToByte(queensRookMoved(-1)), (byte) 0, (byte) 0);
 				} else {
 					newBoardMetaData = createMetaData(boolToByte(kingsRookMoved(1)), (byte) 0,
 							boolToByte(queensRookMoved(1)), staticWhiteKingPosition, staticBlackKingPosition,
 							numMoves, (byte) 1, boolToByte(kingsMoved(-1)),
-							boolToByte(queensRookMoved(-1)));
+							boolToByte(queensRookMoved(-1)), (byte) 0, (byte) 0);
 				}
 			} else if(!queensRookMoved(sideMoving) && oldX == 7) {
 				if(sideMoving == 1) {
 					newBoardMetaData = createMetaData(boolToByte(kingsRookMoved(1)), (byte) 0, (byte) 1,
 							staticWhiteKingPosition, staticBlackKingPosition, numMoves,
 							boolToByte(kingsRookMoved(-1)), boolToByte(kingsMoved(-1)),
-							boolToByte(queensRookMoved(-1)));
+							boolToByte(queensRookMoved(-1)), (byte) 0, (byte) 0);
 				} else {
 					newBoardMetaData = createMetaData(boolToByte(kingsRookMoved(1)), (byte) 0,
 							boolToByte(queensRookMoved(1)), staticWhiteKingPosition, staticBlackKingPosition,
 							numMoves, boolToByte(kingsRookMoved(-1)), boolToByte(kingsMoved(-1)),
-							(byte) 1);
+							(byte) 1, (byte) 0, (byte) 0);
 				}
 			}
 		}
-		//if the metadata hasnt otherwise been changed, set it to be the same, with numMoves updated
+		//check for double pawn move
+		byte isDoublePawnMove = 0;
+		if(move.isDoublePawnMove()){
+			isDoublePawnMove = 1;
+		}
+
+		//if the metadata hasnt otherwise been changed, set it to be the same, with numMoves updated and for the data on whether the last move was a double pawn move
 		if(newBoardMetaData == -1) {
 			newBoardMetaData = createMetaData(boolToByte(kingsRookMoved(1)), boolToByte(kingsMoved(1)),
 					boolToByte(queensRookMoved(1)), staticWhiteKingPosition, staticBlackKingPosition, numMoves,
-					boolToByte(kingsRookMoved(-1)), boolToByte(kingsMoved(-1)), boolToByte(queensRookMoved(-1)));
+					boolToByte(kingsRookMoved(-1)), boolToByte(kingsMoved(-1)), boolToByte(queensRookMoved(-1)), isDoublePawnMove, (byte) oldX);
 		}
 
 		return new Board(newBoard, newBoardMetaData);
@@ -261,9 +271,8 @@ public class Board {
 		if(Utility.getSign(pieceValue) == Utility.getSign(moveToValue)) {
 			return false;
 		}
-		//TODO: fix this
 		if(move.isEnPassantCapture()){
-			return false;
+			return getDoublePawnMovePosition() == newX;
 		}
 
 		if(move.isCastle()) {
@@ -421,11 +430,23 @@ public class Board {
 		return (byte) ((boardMetaData >> 15) & 63);
 	}
 
+	/**
+	 * @return the x position of the pawn that just did a double move, or -1 if the most recent move was not a double pawn move
+	 */
+	public byte getDoublePawnMovePosition() {
+		if(((boardMetaData >> 24) & 1) == 1){
+			return (byte) ((boardMetaData >> 25) & 7);
+		}
+		return -1;
+	}
+
 	private int createMetaData(final byte whiteKingsRookMoved, final byte whiteKingMoved, final byte whiteQueensRookMoved,
 							  final byte whiteKingPosition, final byte blackKingPosition, final byte movesSinceBoardStateChange,
-							  final byte blackKingsRookMoved, final byte blackKingMoved, final byte blackQueensRookMoved) {
-		return  (whiteKingsRookMoved + (whiteKingMoved << 1) + (whiteQueensRookMoved << 2) + (whiteKingPosition << 3) + (blackKingPosition << 9)
-				+ (movesSinceBoardStateChange << 15)) + (blackKingsRookMoved << 21) + (blackKingMoved << 22) + (blackQueensRookMoved << 23);
+							  final byte blackKingsRookMoved, final byte blackKingMoved, final byte blackQueensRookMoved,
+							   final byte lastMoveDoublePawn, final byte doublePawnX) {
+		return  (whiteKingsRookMoved + (whiteKingMoved << 1) + (whiteQueensRookMoved << 2) + (whiteKingPosition << 3)
+				+ (blackKingPosition << 9) + (movesSinceBoardStateChange << 15)) + (blackKingsRookMoved << 21)
+				+ (blackKingMoved << 22) + (blackQueensRookMoved << 23) + (lastMoveDoublePawn << 24) + (doublePawnX << 25);
 	}
 
 	private byte getKingPositionAsByte(final int side) {
