@@ -1,7 +1,9 @@
 package main.java.game.evaluation;
 
+import main.java.debug.Logger;
 import main.java.game.Board;
 import main.java.game.pieces.Piece;
+import main.java.management.Utility;
 
 public class BoardEvaluator {
 
@@ -30,27 +32,42 @@ public class BoardEvaluator {
 		if(piece == Piece.pawnId) {
 			return evaluatePawn(board, x, y);
 		}
+		if(piece == Piece.rookId) {
+			return evaluateRook(board, x, y);
+		}
+		if(piece == Piece.knightId) {
+			return evaluateKnight(board, x, y);
+		}
+		if(piece == Piece.bishopId) {
+			return evaluateBishop(board, x, y);
+		}
+		if(piece == Piece.queenId) {
+			return evaluateQueen(board, x, y);
+		}
+		if(piece == Piece.kingId) {
+			return evaluateKing(board, x, y);
+		}
 
-		return 0;
+		return Double.NaN;
 	}
 
 	private static double evaluatePawn(final byte[][] board, final byte x, final byte y){
-		return pawnValue;
+		return pawnValue * Utility.getSign(board[x][y]);
 	}
 	private static double evaluateBishop(final byte[][] board, final byte x, final byte y){
-		return bishopValue;
+		return bishopValue * Utility.getSign(board[x][y]);
 	}
 	private static double evaluateRook(final byte[][] board, final byte x, final byte y){
-		return rookValue;
+		return rookValue * Utility.getSign(board[x][y]);
 	}
 	private static double evaluateKnight(final byte[][] board, final byte x, final byte y){
-		return knightValue;
+		return knightValue * Utility.getSign(board[x][y]);
 	}
 	private static double evaluateQueen(final byte[][] board, final byte x, final byte y){
-		return queenValue;
+		return queenValue * Utility.getSign(board[x][y]);
 	}
 	private static double evaluateKing(final byte[][] board, final byte x, final byte y){
-		return kingValue;
+		return kingValue * Utility.getSign(board[x][y]);
 	}
 
 

@@ -2,6 +2,7 @@ package main.java.ui;
 
 import javafx.scene.image.Image;
 import main.java.debug.Logger;
+import main.java.game.evaluation.BoardEvaluator;
 import main.java.management.PropertiesManager;
 import main.java.management.Utility;
 import main.java.game.Board;
@@ -45,7 +46,6 @@ public class Controller {
 		if(!canPlayerInteract()){
 			return;
 		}
-		final Board board = game.getCurrentBoardState();
 		final Piece pieceClickedOn = getPiece(boardX, boardY);
 		//if you click on another of your own pieces
 		if(Utility.getSign(pieceClickedOn.getId()) == game.getTurn()) {
@@ -73,6 +73,7 @@ public class Controller {
 					selected.setSelected(false);
 					selected = null;
 					updateChessSquareImages();
+					Logger.log("Evaluation: " + BoardEvaluator.evaluateBoard(game.getCurrentBoardState()));
 				} else {
 					throw new RuntimeException("This should never happen");
 				}
