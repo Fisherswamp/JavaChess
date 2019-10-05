@@ -489,4 +489,8 @@ public class Board {
 		}
 		return newBoard;
 	}
+
+	public byte[][] getBoard() {
+		return board;
+	}
 }
