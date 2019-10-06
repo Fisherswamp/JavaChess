@@ -34,7 +34,7 @@ public class BoardEvaluator {
 				boardValue += evaluatePiece(board.getBoard(), x, y);
 			}
 		}
-		return new Evaluation(boardValue);
+		return new Evaluation(side * boardValue);
 	}
 
 	private static double evaluatePiece(final byte[][] board, final byte x, final byte y) {

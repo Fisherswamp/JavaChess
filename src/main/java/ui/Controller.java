@@ -2,6 +2,7 @@ package main.java.ui;
 
 import javafx.scene.image.Image;
 import main.java.debug.Logger;
+import main.java.game.evaluation.AI;
 import main.java.game.evaluation.BoardEvaluator;
 import main.java.game.evaluation.Evaluation;
 import main.java.management.PropertiesManager;
@@ -17,11 +18,14 @@ import java.util.stream.Collectors;
 
 public class Controller {
 
+	private static final long TEN_SECONDS = 10L * 1_000_000_000L;
+
 	private boolean isInitialized;
 	private Game game;
 	private ChessSquare selected;
 	private ChessSquare[][] squares;
 	private boolean playerControlsWhite, playerControlsBlack;
+	private AI[] ais;
 
 	public Controller(){
 		isInitialized = false;
@@ -35,6 +39,9 @@ public class Controller {
 			this.squares = squares;
 			this.playerControlsWhite = playerControlsWhite;
 			this.playerControlsBlack = playerControlsBlack;
+			ais = new AI[2];
+			ais[0] = new AI(game, TEN_SECONDS, true, 0);
+			ais[1] = new AI(game, TEN_SECONDS, true, 0);
 			updateChessSquareImages();
 		}
 	}
@@ -74,8 +81,12 @@ public class Controller {
 					selected.setSelected(false);
 					selected = null;
 					updateChessSquareImages();
+					final ChessMove aiMove = ais[0].findBestMove();
 					final Evaluation evaluation = BoardEvaluator.evaluateBoard(game.getCurrentBoardState(), (byte) game.getTurn(), 0);
 					Logger.log("Evaluation: " + evaluation.getValue() + "[Game Over: " + evaluation.isGameOver() + "]");
+					Logger.log("Best Move: " + aiMove);
+					game.move(aiMove);
+					updateChessSquareImages();
 				} else {
 					throw new RuntimeException("This should never happen");
 				}
