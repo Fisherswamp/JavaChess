@@ -4,6 +4,7 @@ import main.java.game.Board;
 import main.java.game.Game;
 import main.java.game.moves.ChessMove;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,13 +36,11 @@ public class AI {
 		final int side = game.getTurn();
 		ConcurrentSkipListMap<Evaluation, Queue<ChessMove>> bestMoves = new ConcurrentSkipListMap<>();
 		game.getLegalMoves().parallelStream().forEach( chessMove -> {
-			final Map<Evaluation, ChessMove> moveValue = minmax(board.move(chessMove, false), -side,4, 1, chessMove);
-			moveValue.entrySet().forEach(evaluationChessMoveEntry -> {
-				if (!bestMoves.containsKey(evaluationChessMoveEntry.getKey())) {
-					bestMoves.put(evaluationChessMoveEntry.getKey(), new ConcurrentLinkedQueue<>());
-				}
-				bestMoves.get(evaluationChessMoveEntry.getKey()).add(evaluationChessMoveEntry.getValue());
-			});
+			final Evaluation moveValue = minmax(board.move(chessMove, false), -side,4, 1);
+			if (!bestMoves.containsKey(moveValue)) {
+				bestMoves.put(moveValue, new ConcurrentLinkedQueue<>());
+			}
+			bestMoves.get(moveValue).add(chessMove);
 		});
 		final Queue<ChessMove> bestMovesQueue = bestMoves.firstEntry().getValue();
 		return bestMovesQueue.peek();
@@ -53,22 +52,21 @@ public class AI {
 	 * @param side
 	 * @return Returns a map with the best evaluation and all moves that fit
 	 */
-	private ConcurrentSkipListMap<Evaluation, ChessMove> minmax(final Board board, final int side, final int maxDepth, final int depth, final ChessMove firstMove) {
-		final ConcurrentSkipListMap<Evaluation, ChessMove> map = new ConcurrentSkipListMap<>();
+	private Evaluation minmax(final Board board, final int side, final int maxDepth, final int depth) {
 		if(depth >= maxDepth) {
-			final Evaluation evaluation = BoardEvaluator.evaluateBoard(board, (byte) side, depth);
-			map.put(evaluation, firstMove);
-			return map;
+			return BoardEvaluator.evaluateBoard(board, (byte) side, depth);
 		}
+		List<Evaluation> bestEvaluation = new ArrayList<>();
+		bestEvaluation.add(new Evaluation(-side*Double.MAX_VALUE));
 		board.getLegalMoves((byte) side).forEach(chessMove -> {
 			final Board newBoard = board.move(chessMove, false);
-			map.putAll(minmax(newBoard, -side, maxDepth, depth+1, firstMove));
+			final Evaluation evaluation = minmax(newBoard, -side, maxDepth, depth+1);
+			if(evaluation.compareTo(bestEvaluation.get(0)) > 0) {
+				bestEvaluation.clear();
+				bestEvaluation.add(evaluation);
+			}
 		});
-
-		final Map.Entry<Evaluation, ChessMove> bestMove = map.firstEntry();
-		final ConcurrentSkipListMap<Evaluation, ChessMove> emptyMap = new ConcurrentSkipListMap<>();
-		emptyMap.put(bestMove.getKey(), bestMove.getValue());
-		return emptyMap;
+		return bestEvaluation.get(0);
 	}
 
 }

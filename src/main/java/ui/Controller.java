@@ -83,7 +83,7 @@ public class Controller {
 					updateChessSquareImages();
 					final ChessMove aiMove = ais[0].findBestMove();
 					final Evaluation evaluation = BoardEvaluator.evaluateBoard(game.getCurrentBoardState(), (byte) game.getTurn(), 0);
-					Logger.log("Evaluation: " + evaluation.getValue() + "[Game Over: " + evaluation.isGameOver() + "]");
+					Logger.log("Evaluation: " + evaluation.getValue() + "for side " + game.getTurn() + "[Game Over: " + evaluation.isGameOver() + "]");
 					Logger.log("Best Move: " + aiMove);
 					game.move(aiMove);
 					updateChessSquareImages();
