@@ -31,19 +31,25 @@ public class AI {
 	}
 
 	public ChessMove findBestMove() {
+		System.out.printf("Finding best move...\n");
+		return findBestMoves().firstEntry().getValue().peek();
+	}
+
+	public ConcurrentSkipListMap<Evaluation, Queue<ChessMove>> findBestMoves() {
 		final long startTime = System.nanoTime();
 		final Board board = game.getCurrentBoardState();
 		final int side = game.getTurn();
 		ConcurrentSkipListMap<Evaluation, Queue<ChessMove>> bestMoves = new ConcurrentSkipListMap<>();
 		game.getLegalMoves().parallelStream().forEach( chessMove -> {
-			final Evaluation moveValue = minmax(board.move(chessMove, false), -side,4, 1);
+			System.out.printf("%s: %s\n", Thread.currentThread().getName(), chessMove.toString());
+			final Evaluation moveValue = minmax(board.move(chessMove, false), -side,0, 1);
 			if (!bestMoves.containsKey(moveValue)) {
 				bestMoves.put(moveValue, new ConcurrentLinkedQueue<>());
 			}
 			bestMoves.get(moveValue).add(chessMove);
 		});
-		final Queue<ChessMove> bestMovesQueue = bestMoves.firstEntry().getValue();
-		return bestMovesQueue.peek();
+		System.out.printf("Found best move in %.4f seconds\n",(System.nanoTime()-startTime)/1_000_000_000f );
+		return bestMoves;
 	}
 
 	/**
@@ -57,7 +63,7 @@ public class AI {
 			return BoardEvaluator.evaluateBoard(board, (byte) side, depth);
 		}
 		List<Evaluation> bestEvaluation = new ArrayList<>();
-		bestEvaluation.add(new Evaluation(-side*Double.MAX_VALUE));
+		bestEvaluation.add(new Evaluation(Double.MIN_VALUE));
 		board.getLegalMoves((byte) side).forEach(chessMove -> {
 			final Board newBoard = board.move(chessMove, false);
 			final Evaluation evaluation = minmax(newBoard, -side, maxDepth, depth+1);

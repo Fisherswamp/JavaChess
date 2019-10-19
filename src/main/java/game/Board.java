@@ -272,7 +272,13 @@ public class Board {
 			return false;
 		}
 		if(move.isEnPassantCapture()){
-			return getDoublePawnMovePosition() == newX;
+			final byte[] pieceTakeDeltaPos = ((EnPassantMove)move).getPawnCaptureDeltaPosition();
+			final int captureX = oldX + pieceTakeDeltaPos[0];
+			final int captureY = oldY + pieceTakeDeltaPos[1];
+			if(getPiece(captureX, captureY) == Piece.pawnId*sideMoving*-1){//if not taking pawn, return false
+				return getDoublePawnMovePosition() == captureX;
+			}
+			return false;
 		}
 		if(move.isCastle()) {
 			if (kingsMoved(sideMoving)) {

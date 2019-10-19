@@ -14,6 +14,7 @@ import main.java.game.pieces.Piece;
 import main.java.game.pieces.PieceFactory;
 
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class Controller {
@@ -81,12 +82,15 @@ public class Controller {
 					selected.setSelected(false);
 					selected = null;
 					updateChessSquareImages();
-					final ChessMove aiMove = ais[0].findBestMove();
-					final Evaluation evaluation = BoardEvaluator.evaluateBoard(game.getCurrentBoardState(), (byte) game.getTurn(), 0);
-					Logger.log("Evaluation: " + evaluation.getValue() + "for side " + game.getTurn() + "[Game Over: " + evaluation.isGameOver() + "]");
-					Logger.log("Best Move: " + aiMove);
-					game.move(aiMove);
-					updateChessSquareImages();
+					final Thread thread = new Thread(() -> {
+						final var allMoves = ais[0].findBestMoves();
+						allMoves.forEach((evaluation, chessMoves) -> {
+							System.out.printf("[ %.2f ]: %s\n", evaluation.getValue(), chessMoves.toString());
+						});
+						game.move(allMoves.pollFirstEntry().getValue().peek());
+						updateChessSquareImages();
+					});
+					thread.start();
 				} else {
 					throw new RuntimeException("This should never happen");
 				}

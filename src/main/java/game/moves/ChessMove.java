@@ -37,9 +37,10 @@ public class ChessMove {
 	}
 
 	public String toString() {
-		char coordsToLetter[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
-
-		return PieceFactory.getPieceName(pieceId) + ": " + (char)('a' + newPosition[0]) + "" + (1 + newPosition[1]);
+		final char coordsToLetter[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+		final String extraInfo = move.isCastle() ? "Castle" : move.isEnPassantCapture() ? "ep" : move.isExclusiveCaptureMove() ? "x"
+				: move.isPromotionMove() ? "=" + PieceFactory.getPieceName(((PromotionMove)move).promotionId()) : "";
+		return PieceFactory.getPieceName(pieceId) + ": " + (char)('a' + newPosition[0]) + "" + (1 + newPosition[1]) + " " + extraInfo;
 	}
 
 	public Move getMove() {
