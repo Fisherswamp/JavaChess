@@ -52,7 +52,8 @@ public class AI {
 			final ConcurrentSkipListMap<Evaluation, Queue<ChessMove>> bestMoves = new ConcurrentSkipListMap<>();
 			game.getLegalMoves().parallelStream().forEach(chessMove -> {
 				//System.out.printf("%s: %s\n", Thread.currentThread().getName(), chessMove.toString());
-				final Evaluation moveValue = minmax(board.move(chessMove, false), -sideMaximizing, 1, maxDepth.get(), startTime, maxTime);
+				final Evaluation moveValue = minmax(board.move(chessMove, false), -sideMaximizing,
+						1, maxDepth.get(), startTime, maxTime, Double.MIN_VALUE, Double.MAX_VALUE);//TODO: change this to max and min
 				if(moveValue != null) {//if movevalue is null, we want to finish asap
 					if (!bestMoves.containsKey(moveValue)) {
 						bestMoves.put(moveValue, new ConcurrentLinkedQueue<>());
@@ -75,7 +76,8 @@ public class AI {
 	 * @param side
 	 * @return Returns a map with the best evaluation and all moves that fit
 	 */
-	private Evaluation minmax(final Board board, final int side, final int depth, final int maxDepth, final long startTime, final long maxTime) {
+	private Evaluation minmax(final Board board, final int side, final int depth, final int maxDepth,
+							  final long startTime, final long maxTime, double alpha, double beta) {
 		if(System.nanoTime()-startTime >= maxTime) {
 			return null;
 		}
@@ -83,21 +85,30 @@ public class AI {
 			return BoardEvaluator.evaluateBoard(board, (byte) side, depth);
 		}
 		final boolean isMaximizing = side == 1;
-		List<Evaluation> bestChoice = new ArrayList<>();
-		bestChoice.add(isMaximizing ? new Evaluation(Double.MIN_VALUE) : new Evaluation(Double.MAX_VALUE));
+		Evaluation bestChoice = isMaximizing ? new Evaluation(Double.MIN_VALUE) : new Evaluation(Double.MAX_VALUE);
 		for(ChessMove chessMove : board.getLegalMoves((byte) side)) {
 			final Board newBoard = board.move(chessMove, false);
-			final Evaluation evaluation = minmax(newBoard, -side, depth+1, maxDepth, startTime, maxTime);
+			final Evaluation evaluation = minmax(newBoard, -side, depth+1, maxDepth, startTime, maxTime, alpha, beta);
 			if(evaluation == null) {
 				return null;
 			}
-			final boolean betterChoice = isMaximizing ? evaluation.compareTo(bestChoice.get(0)) > 0 : evaluation.compareTo(bestChoice.get(0)) < 0;
+			final boolean betterChoice = isMaximizing ? evaluation.compareTo(bestChoice) > 0 : evaluation.compareTo(bestChoice) < 0;
 			if(betterChoice) {
-				bestChoice.clear();
-				bestChoice.add(evaluation);
+				bestChoice = evaluation;
+			}
+			if(isMaximizing) {
+				alpha = Math.max(alpha, evaluation.getValue());
+				if(beta <= alpha) {
+					break;
+				}
+			} else {
+				beta = Math.min(beta, evaluation.getValue());
+				if(beta <= alpha) {
+					break;
+				}
 			}
 		}
-		return bestChoice.get(0);
+		return bestChoice;
 	}
 
 }

@@ -243,7 +243,7 @@ public class Board {
 
 		return new Board(newBoard, newBoardMetaData);
 	}
-
+	//TODO: I think there's a bug with taking while promoting
 	private boolean canApplyMove(final ChessMove chessMove) {
 		final Move move = chessMove.getMove();
 		final byte[] positionOfPieceToMove = chessMove.getPositionOfPieceToMove();

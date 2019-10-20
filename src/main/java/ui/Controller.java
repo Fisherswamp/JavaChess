@@ -82,7 +82,7 @@ public class Controller {
 //						allMoves.forEach((evaluation, chessMoves) -> {
 //							System.out.printf("[ %.2f ]: %s\n", evaluation.getValue(), chessMoves.toString());
 //						});
-						game.move(ais[0].findBestMove(0_500_000_000L));
+						game.move(ais[0].findBestMove(3_000_000_000L));
 						updateChessSquareImages();
 					});
 					thread.start();
