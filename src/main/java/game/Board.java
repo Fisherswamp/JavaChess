@@ -243,7 +243,7 @@ public class Board {
 
 		return new Board(newBoard, newBoardMetaData);
 	}
-
+	//TODO: I think there's a bug with taking while promoting
 	private boolean canApplyMove(final ChessMove chessMove) {
 		final Move move = chessMove.getMove();
 		final byte[] positionOfPieceToMove = chessMove.getPositionOfPieceToMove();
@@ -272,9 +272,14 @@ public class Board {
 			return false;
 		}
 		if(move.isEnPassantCapture()){
-			return getDoublePawnMovePosition() == newX;
+			final byte[] pieceTakeDeltaPos = ((EnPassantMove)move).getPawnCaptureDeltaPosition();
+			final int captureX = oldX + pieceTakeDeltaPos[0];
+			final int captureY = oldY + pieceTakeDeltaPos[1];
+			if(getPiece(captureX, captureY) == Piece.pawnId*sideMoving*-1){//if not taking pawn, return false
+				return getDoublePawnMovePosition() == captureX;
+			}
+			return false;
 		}
-
 		if(move.isCastle()) {
 			if (kingsMoved(sideMoving)) {
 				return false;
@@ -302,6 +307,11 @@ public class Board {
 			if(moveToValue == Piece.emptyId) {
 				return false;
 			}
+		} else if(Math.abs(pieceValue) == Piece.pawnId) {
+			//Can't be a capture -> must move to empty square
+			if(moveToValue != Piece.emptyId) {
+				return false;
+			}
 		}
 		//can only double pawn move on starting square, cant double move through piece
 		if(move.isDoublePawnMove()) {
@@ -315,11 +325,15 @@ public class Board {
 		}
 
 		Board boardWithMove = blitheMove(chessMove);
-		if(boardWithMove.isPositionInCheck(boardWithMove.getKingPosition(sideMoving), sideMoving)){
+		if(boardWithMove.isKingInCheck(sideMoving)){
 			return false;
 		}
 
 		return true;
+	}
+
+	public boolean isKingInCheck(final byte side) {
+		return isPositionInCheck(getKingPosition(side), side);
 	}
 
 	private boolean isPositionInCheck(final byte[] position, final byte side){
@@ -488,5 +502,9 @@ public class Board {
 			newBoard[i] = board[i].clone();
 		}
 		return newBoard;
+	}
+
+	public byte[][] getBoard() {
+		return board;
 	}
 }

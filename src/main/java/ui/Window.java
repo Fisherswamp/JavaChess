@@ -48,7 +48,7 @@ public class Window extends Application {
 				index = 0;
 			}
 		}
-		controller.init(squares,true, true);
+		controller.init(squares,true, false);
 
 		BorderPane.setAlignment(chessBoardPane, Pos.CENTER);
 		mainUIPane.setCenter(chessBoardPane);

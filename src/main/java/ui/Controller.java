@@ -2,6 +2,9 @@ package main.java.ui;
 
 import javafx.scene.image.Image;
 import main.java.debug.Logger;
+import main.java.game.evaluation.AI;
+import main.java.game.evaluation.BoardEvaluator;
+import main.java.game.evaluation.Evaluation;
 import main.java.management.PropertiesManager;
 import main.java.management.Utility;
 import main.java.game.Board;
@@ -11,15 +14,19 @@ import main.java.game.pieces.Piece;
 import main.java.game.pieces.PieceFactory;
 
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class Controller {
+
+	private static final long TEN_SECONDS = 10L * 1_000_000_000L;
 
 	private boolean isInitialized;
 	private Game game;
 	private ChessSquare selected;
 	private ChessSquare[][] squares;
 	private boolean playerControlsWhite, playerControlsBlack;
+	private AI[] ais;
 
 	public Controller(){
 		isInitialized = false;
@@ -33,6 +40,9 @@ public class Controller {
 			this.squares = squares;
 			this.playerControlsWhite = playerControlsWhite;
 			this.playerControlsBlack = playerControlsBlack;
+			ais = new AI[2];
+			ais[0] = new AI(game, TEN_SECONDS, true, 0);
+			ais[1] = new AI(game, TEN_SECONDS, true, 0);
 			updateChessSquareImages();
 		}
 	}
@@ -45,7 +55,6 @@ public class Controller {
 		if(!canPlayerInteract()){
 			return;
 		}
-		final Board board = game.getCurrentBoardState();
 		final Piece pieceClickedOn = getPiece(boardX, boardY);
 		//if you click on another of your own pieces
 		if(Utility.getSign(pieceClickedOn.getId()) == game.getTurn()) {
@@ -54,11 +63,6 @@ public class Controller {
 			}
 			selected = squares[boardX][boardY];
 			selected.setSelected(true);
-			Logger.log(game.getLegalMoves().stream()
-					.filter(chessMove -> {
-						final byte[] startPosition = chessMove.getPositionOfPieceToMove();
-						return (startPosition[0] == selected.getX() && startPosition[1] == selected.getY());
-					}).collect(Collectors.toList()).toString());
 		} else if(selected != null) {
 			List<ChessMove> relevantMoves = game.getLegalMoves()
 					.stream()
@@ -73,6 +77,15 @@ public class Controller {
 					selected.setSelected(false);
 					selected = null;
 					updateChessSquareImages();
+					final Thread thread = new Thread(() -> {
+//						final var allMoves = ais[0].findBestMoves();
+//						allMoves.forEach((evaluation, chessMoves) -> {
+//							System.out.printf("[ %.2f ]: %s\n", evaluation.getValue(), chessMoves.toString());
+//						});
+						game.move(ais[0].findBestMove(3_000_000_000L));
+						updateChessSquareImages();
+					});
+					thread.start();
 				} else {
 					throw new RuntimeException("This should never happen");
 				}

@@ -47,4 +47,8 @@ public class Game {
 		return turn;
 	}
 
+	public int getNumMoves() {
+		return boardStates.size() - 1;
+	}
+
 }
