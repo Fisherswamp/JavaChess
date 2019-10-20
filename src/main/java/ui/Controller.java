@@ -63,11 +63,6 @@ public class Controller {
 			}
 			selected = squares[boardX][boardY];
 			selected.setSelected(true);
-			Logger.log(game.getLegalMoves().stream()
-					.filter(chessMove -> {
-						final byte[] startPosition = chessMove.getPositionOfPieceToMove();
-						return (startPosition[0] == selected.getX() && startPosition[1] == selected.getY());
-					}).collect(Collectors.toList()).toString());
 		} else if(selected != null) {
 			List<ChessMove> relevantMoves = game.getLegalMoves()
 					.stream()
@@ -87,7 +82,7 @@ public class Controller {
 //						allMoves.forEach((evaluation, chessMoves) -> {
 //							System.out.printf("[ %.2f ]: %s\n", evaluation.getValue(), chessMoves.toString());
 //						});
-						game.move(ais[0].findBestMove());
+						game.move(ais[0].findBestMove(0_500_000_000L));
 						updateChessSquareImages();
 					});
 					thread.start();
