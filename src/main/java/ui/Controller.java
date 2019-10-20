@@ -83,11 +83,11 @@ public class Controller {
 					selected = null;
 					updateChessSquareImages();
 					final Thread thread = new Thread(() -> {
-						final var allMoves = ais[0].findBestMoves();
-						allMoves.forEach((evaluation, chessMoves) -> {
-							System.out.printf("[ %.2f ]: %s\n", evaluation.getValue(), chessMoves.toString());
-						});
-						game.move(allMoves.pollFirstEntry().getValue().peek());
+//						final var allMoves = ais[0].findBestMoves();
+//						allMoves.forEach((evaluation, chessMoves) -> {
+//							System.out.printf("[ %.2f ]: %s\n", evaluation.getValue(), chessMoves.toString());
+//						});
+						game.move(ais[0].findBestMove());
 						updateChessSquareImages();
 					});
 					thread.start();

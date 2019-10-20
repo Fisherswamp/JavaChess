@@ -18,12 +18,19 @@ public class BoardEvaluator {
 	public static final int queenValue = 9;
 	public static final int kingValue = 1000;
 
+	/**
+	 *
+	 * @param board Board to evaluate
+	 * @param side Side who's turn it is for the board
+	 * @param depth How deep the evaluation is
+	 * @return Evaluation with a value; Positive means good for white, negative means good for black
+	 */
 	public static Evaluation evaluateBoard(final Board board, final byte side, final int depth) {
 		final List<ChessMove> legalMoves = board.getLegalMoves(side);
 		if(legalMoves.isEmpty()) {
 			//Either stalemate or checkmate
 			if(board.isKingInCheck(side)) {
-				return new Evaluation(-side * 1000, true, depth);
+				return new Evaluation(-side*1000, true, depth);
 			} else {
 				return new Evaluation(0, true, depth);
 			}
@@ -34,7 +41,7 @@ public class BoardEvaluator {
 				boardValue += evaluatePiece(board.getBoard(), x, y);
 			}
 		}
-		return new Evaluation(side * boardValue);
+		return new Evaluation(boardValue);
 	}
 
 	private static double evaluatePiece(final byte[][] board, final byte x, final byte y) {
