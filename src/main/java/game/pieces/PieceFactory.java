@@ -19,10 +19,10 @@ import java.util.Map;
 public class PieceFactory {
 
 	private static final Map<Byte, Map<String, Image>> idAndSkinToImageMap = new HashMap<>();
-	private static final Map<Byte, Piece> pieceMap = initializePieces();
+	private static final Map<Byte, main.java.game.pieces.Piece> pieceMap = initializePieces();
 
-	private static Map<Byte, Piece> initializePieces() {
-		final Map<Byte, Piece> pieceMap = new HashMap<>();
+	private static Map<Byte, main.java.game.pieces.Piece> initializePieces() {
+		final Map<Byte, main.java.game.pieces.Piece> pieceMap = new HashMap<>();
 		final byte inf = Move.infinity;
 		final List<Move> knightMoves = Arrays.asList(
 				new Move(new byte[]{-2, -1}),
@@ -77,22 +77,22 @@ public class PieceFactory {
 		final List<Move> queenMoves = new ArrayList<>(rookMoves);
 		queenMoves.addAll(bishopMoves);
 
-		pieceMap.put((byte) 0, new Piece(Piece.emptyId, 0, new ArrayList<>(), "Empty"));//put the empty piece with no possible moves
-		pieceMap.put(Piece.pawnId, new Piece(Piece.pawnId, BoardEvaluator.pawnValue, whitePawnMoves, "WhitePawn"));
-		pieceMap.put((byte) -Piece.pawnId, new Piece((byte) -Piece.pawnId, -BoardEvaluator.pawnValue, blackPawnMoves, "BlackPawn"));
+		pieceMap.put((byte) 0, new main.java.game.pieces.Piece(main.java.game.pieces.Piece.emptyId, 0, new ArrayList<>(), "Empty"));//put the empty piece with no possible moves
+		pieceMap.put(main.java.game.pieces.Piece.pawnId, new main.java.game.pieces.Piece(main.java.game.pieces.Piece.pawnId, BoardEvaluator.pawnValue, whitePawnMoves, "WhitePawn"));
+		pieceMap.put((byte) -main.java.game.pieces.Piece.pawnId, new main.java.game.pieces.Piece((byte) -main.java.game.pieces.Piece.pawnId, -BoardEvaluator.pawnValue, blackPawnMoves, "BlackPawn"));
 		Arrays.asList(-1, 1).forEach(
 				side -> {
 					String sideStr = side == 1 ? "White" : "Black";
-					pieceMap.put((byte) (side * Piece.knightId),
-						new Piece((byte) (side * Piece.knightId), side * BoardEvaluator.knightValue, knightMoves, sideStr+"Knight"));
-					pieceMap.put((byte) (side * Piece.bishopId),
-							new Piece((byte) (side * Piece.bishopId), side * BoardEvaluator.bishopValue, bishopMoves, sideStr+"Bishop"));
-					pieceMap.put((byte) (side * Piece.rookId),
-							new Piece((byte) (side * Piece.rookId), side * BoardEvaluator.rookValue, rookMoves, sideStr+"Rook"));
-					pieceMap.put((byte) (side * Piece.queenId),
-							new Piece((byte) (side * Piece.queenId), side * BoardEvaluator.queenValue, queenMoves, sideStr+"Queen"));
-					pieceMap.put((byte) (side * Piece.kingId),
-							new Piece((byte) (side * Piece.kingId), side * BoardEvaluator.kingValue, kingMoves, sideStr+"King"));
+					pieceMap.put((byte) (side * main.java.game.pieces.Piece.knightId),
+						new main.java.game.pieces.Piece((byte) (side * main.java.game.pieces.Piece.knightId), side * BoardEvaluator.knightValue, knightMoves, sideStr+"Knight"));
+					pieceMap.put((byte) (side * main.java.game.pieces.Piece.bishopId),
+							new main.java.game.pieces.Piece((byte) (side * main.java.game.pieces.Piece.bishopId), side * BoardEvaluator.bishopValue, bishopMoves, sideStr+"Bishop"));
+					pieceMap.put((byte) (side * main.java.game.pieces.Piece.rookId),
+							new main.java.game.pieces.Piece((byte) (side * main.java.game.pieces.Piece.rookId), side * BoardEvaluator.rookValue, rookMoves, sideStr+"Rook"));
+					pieceMap.put((byte) (side * main.java.game.pieces.Piece.queenId),
+							new main.java.game.pieces.Piece((byte) (side * main.java.game.pieces.Piece.queenId), side * BoardEvaluator.queenValue, queenMoves, sideStr+"Queen"));
+					pieceMap.put((byte) (side * main.java.game.pieces.Piece.kingId),
+							new main.java.game.pieces.Piece((byte) (side * main.java.game.pieces.Piece.kingId), side * BoardEvaluator.kingValue, kingMoves, sideStr+"King"));
 				}
 
 		);
@@ -117,7 +117,7 @@ public class PieceFactory {
 		return pieceMap.get(id).getName();
 	}
 
-	public static Piece getPiece(final byte id) {
+	public static main.java.game.pieces.Piece getPiece(final byte id) {
 		return pieceMap.get(id);
 	}
 
@@ -128,8 +128,8 @@ public class PieceFactory {
 			if(pieceImage != null){
 				return  pieceImage;
 			} else {
-				final String url = "main/resources/images/skins/" + skinName + "/" + getPieceName(id) + ".png";
-				try(final InputStream inputStream = PieceFactory.class.getClassLoader().getResourceAsStream(url)) {
+				final String url = "/images/skins/" + skinName + "/" + getPieceName(id) + ".png";
+				try(final InputStream inputStream = PieceFactory.class.getResourceAsStream(url)) {
 					if(inputStream == null){
 						return null;
 					}

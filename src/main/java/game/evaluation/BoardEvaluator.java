@@ -28,14 +28,14 @@ public class BoardEvaluator {
 	 * @param depth How deep the evaluation is
 	 * @return Evaluation with a value; Positive means good for white, negative means good for black
 	 */
-	public static Evaluation evaluateBoard(final Board board, final byte side, final int depth) {
+	public static main.java.game.evaluation.Evaluation evaluateBoard(final Board board, final byte side, final int depth) {
 		final List<ChessMove> legalMoves = board.getLegalMoves(side);
 		if(legalMoves.isEmpty()) {
 			//Either stalemate or checkmate
 			if(board.isKingInCheck(side)) {
-				return new Evaluation(-side*1000, true, depth);
+				return new main.java.game.evaluation.Evaluation(-side*1000, true, depth);
 			} else {
-				return new Evaluation(0, true, depth);
+				return new main.java.game.evaluation.Evaluation(0, true, depth);
 			}
 		}
 		//TODO add 50 move rule and 3 exact same positions rule
@@ -48,7 +48,7 @@ public class BoardEvaluator {
 				boardValue += evaluatePiece(board.getBoard(), x, y);
 			}
 		}
-		return new Evaluation(boardValue);
+		return new main.java.game.evaluation.Evaluation(boardValue);
 	}
 
 	public static double evaluatePiece(final byte[][] board, final byte x, final byte y) {
@@ -99,7 +99,7 @@ public class BoardEvaluator {
 
 	private static int[][] loadPawnPositionMap() {
 
-		try(InputStream inputStream = Window.class.getClassLoader().getResourceAsStream("main/resources/evaluation/pawn.json")) {
+		try(InputStream inputStream = Window.class.getResourceAsStream("main/resources/evaluation/pawn.json")) {
 
 		} catch (IOException | NullPointerException e) {
 			e.printStackTrace();

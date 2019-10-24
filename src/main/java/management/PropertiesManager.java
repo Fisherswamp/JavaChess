@@ -13,7 +13,7 @@ public class PropertiesManager {
 	private static Properties initProperties() {
 		properties = new Properties();
 
-		try(InputStream inputStream = Window.class.getClassLoader().getResourceAsStream("main/resources/chess.properties")) {
+		try(InputStream inputStream = Window.class.getResourceAsStream("/chess.properties")) {
 			properties.load(inputStream);
 			return properties;
 		} catch (IOException | NullPointerException e) {
