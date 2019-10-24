@@ -13,6 +13,7 @@ import main.java.game.moves.ChessMove;
 import main.java.game.pieces.Piece;
 import main.java.game.pieces.PieceFactory;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -63,6 +64,7 @@ public class Controller {
 			}
 			selected = squares[boardX][boardY];
 			selected.setSelected(true);
+			System.out.printf("Moves: %s\n", game.getLegalMoves().stream().filter( chessMove -> chessMove.getPositionOfPieceToMove()[0] == boardX && chessMove.getPositionOfPieceToMove()[1] == boardY).collect(Collectors.toList()));
 		} else if(selected != null) {
 			List<ChessMove> relevantMoves = game.getLegalMoves()
 					.stream()
@@ -77,20 +79,23 @@ public class Controller {
 					selected.setSelected(false);
 					selected = null;
 					updateChessSquareImages();
-					final Thread thread = new Thread(() -> {
-//						final var allMoves = ais[0].findBestMoves();
-//						allMoves.forEach((evaluation, chessMoves) -> {
-//							System.out.printf("[ %.2f ]: %s\n", evaluation.getValue(), chessMoves.toString());
-//						});
-						game.move(ais[0].findBestMove(3_000_000_000L));
-						updateChessSquareImages();
-					});
-					thread.start();
+					AIMove();
 				} else {
 					throw new RuntimeException("This should never happen");
 				}
 			}
 		}
+	}
+
+	public void AIMove() {
+		final Thread thread = new Thread(() -> {
+			game.move(ais[0].findBestMove(1_000_000_000L));
+			updateChessSquareImages();
+			if(!canPlayerInteract()) {
+				AIMove();
+			}
+		});
+		thread.start();
 	}
 
 	private void updateChessSquareImages() {

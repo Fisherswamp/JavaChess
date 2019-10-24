@@ -48,8 +48,8 @@ public class Window extends Application {
 				index = 0;
 			}
 		}
-		controller.init(squares,true, false);
-
+		controller.init(squares,false, false);
+		controller.AIMove();
 		BorderPane.setAlignment(chessBoardPane, Pos.CENTER);
 		mainUIPane.setCenter(chessBoardPane);
 

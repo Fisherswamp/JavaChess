@@ -35,6 +35,10 @@ public class BoardEvaluator {
 				return new Evaluation(0, true, depth);
 			}
 		}
+		//TODO add 50 move rule and 3 exact same positions rule
+//		if(board.getMovesSinceBoardStateChange() >= 100) {
+//
+//		}
 		double boardValue = 0;
 		for(byte y = 0; y < board.getBoardDimension(); y++) {
 			for(byte x = 0; x < board.getBoardDimension(); x++){
@@ -44,7 +48,7 @@ public class BoardEvaluator {
 		return new Evaluation(boardValue);
 	}
 
-	private static double evaluatePiece(final byte[][] board, final byte x, final byte y) {
+	public static double evaluatePiece(final byte[][] board, final byte x, final byte y) {
 		final int piece = Math.abs(board[x][y]);
 		if(piece == Piece.emptyId){
 			return 0;

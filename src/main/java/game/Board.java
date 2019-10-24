@@ -77,6 +77,7 @@ public class Board {
 				}
 				final List<Move> possibleMoves = PieceFactory.getPieceMoves(piece);
 				final byte[] position = new byte[]{(byte) x, (byte) y};
+				//todo: figure out the weird shenanigans with promotion move and taking on the final square
 				getChessMovesFromMoveList(possibleMoves, position, piece).forEach(chessMove -> {
 					if(canApplyMove(chessMove)) {
 						legalMoves.add(chessMove);
@@ -271,6 +272,10 @@ public class Board {
 		if(Utility.getSign(pieceValue) == Utility.getSign(moveToValue)) {
 			return false;
 		}
+		//debug
+//		if(move.isPromotionMove()){
+//			Logger.log(chessMove.toString());
+//		}
 		if(move.isEnPassantCapture()){
 			final byte[] pieceTakeDeltaPos = ((EnPassantMove)move).getPawnCaptureDeltaPosition();
 			final int captureX = oldX + pieceTakeDeltaPos[0];
