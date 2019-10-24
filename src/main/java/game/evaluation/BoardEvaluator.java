@@ -1,15 +1,18 @@
 package main.java.game.evaluation;
 
-import main.java.debug.Logger;
 import main.java.game.Board;
 import main.java.game.moves.ChessMove;
-import main.java.game.moves.Move;
 import main.java.game.pieces.Piece;
 import main.java.management.Utility;
+import main.java.ui.Window;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 public class BoardEvaluator {
+
+	private static int[][] pawnPositionMap = loadPawnPositionMap();
 
 	public static final int pawnValue = 1;
 	public static final int knightValue = 3;
@@ -92,6 +95,16 @@ public class BoardEvaluator {
 	}
 	private static double evaluateKing(final byte[][] board, final byte x, final byte y){
 		return kingValue * Utility.getSign(board[x][y]);
+	}
+
+	private static int[][] loadPawnPositionMap() {
+
+		try(InputStream inputStream = Window.class.getClassLoader().getResourceAsStream("main/resources/evaluation/pawn.json")) {
+
+		} catch (IOException | NullPointerException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 
