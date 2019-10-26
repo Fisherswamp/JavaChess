@@ -5,6 +5,7 @@ import main.java.debug.Logger;
 import main.java.game.evaluation.AI;
 import main.java.game.evaluation.BoardEvaluator;
 import main.java.game.evaluation.Evaluation;
+import main.java.game.moves.PromotionMove;
 import main.java.management.PropertiesManager;
 import main.java.management.Utility;
 import main.java.game.Board;
@@ -75,11 +76,20 @@ public class Controller {
 								&& (startPosition[0] == selected.getX() && startPosition[1] == selected.getY());
 					}).collect(Collectors.toList());
 			if(relevantMoves.size() > 0){
+				relevantMoves = relevantMoves.stream().filter(chessMove -> {
+					if(chessMove.getMove().isPromotionMove()) {
+						return Math.abs(((PromotionMove) chessMove.getMove()).promotionId()) == Piece.queenId;
+					}else {
+						return true;
+					}
+				}).collect(Collectors.toList());
 				if(game.move(relevantMoves.get(0))){
 					selected.setSelected(false);
 					selected = null;
 					updateChessSquareImages();
-					AIMove();
+					if(!canPlayerInteract()) {
+						AIMove();
+					}
 				} else {
 					throw new RuntimeException("This should never happen");
 				}

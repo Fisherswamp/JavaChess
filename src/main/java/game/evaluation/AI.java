@@ -4,20 +4,13 @@ import main.java.game.Board;
 import main.java.game.Game;
 import main.java.game.moves.ChessMove;
 import main.java.game.pieces.Piece;
-import main.java.game.pieces.PieceFactory;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class AI {
 
@@ -51,7 +44,7 @@ public class AI {
 		final List<ChessMove> legalMoves = prioritizeMoveList(game.getLegalMoves(), board);
 		ConcurrentSkipListMap<Evaluation, Queue<ChessMove>> deepestEvaluation = new ConcurrentSkipListMap<>();
 		final AtomicInteger maxDepth = new AtomicInteger(2);
-		while (System.nanoTime()-startTime < maxTime) {
+		while (System.nanoTime()-startTime < maxTime) {//TODO: end early if find guaranteed checkmate
 			final ConcurrentSkipListMap<Evaluation, Queue<ChessMove>> bestMoves = new ConcurrentSkipListMap<>();
 			legalMoves.parallelStream().forEach(chessMove -> {
 				final Evaluation moveValue = minmax(board.move(chessMove, false), -sideMaximizing,
@@ -79,7 +72,7 @@ public class AI {
 	 * @return Returns a map with the best evaluation and all moves that fit
 	 */
 	private Evaluation minmax(final Board board, final int side, final int depth, final int maxDepth,
-							  final long startTime, final long maxTime, double alpha, double beta) {
+														final long startTime, final long maxTime, double alpha, double beta) {
 		if(System.nanoTime()-startTime >= maxTime) {
 			return null;
 		}

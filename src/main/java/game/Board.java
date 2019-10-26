@@ -45,7 +45,7 @@ public class Board {
 	private final int boardMetaData;
 
 	public Board() {
-		this(initializedBoard());
+		this(initializedBoard(false));
 	}
 
 	private Board(final byte[][] copyOf) {
@@ -477,7 +477,7 @@ public class Board {
 		return (byte) ((position[1] << 3) + (position[0]));
 	}
 
-	private static byte[][] initializedBoard(){
+	private static byte[][] initializedBoard(boolean onlyPawns){
 		byte[][] newBoard = new byte[boardDimension][boardDimension];
 		Arrays.asList(-1, 1).forEach(
 				side -> {
@@ -488,13 +488,15 @@ public class Board {
 					}
 					//Fill Pieces
 					final int yPos = side == 1 ? 0 : 7;
-					newBoard[0][yPos] = (byte) (Piece.rookId * side);
-					newBoard[7][yPos] = (byte) (Piece.rookId * side);
-					newBoard[1][yPos] = (byte) (Piece.knightId * side);
-					newBoard[6][yPos] = (byte) (Piece.knightId * side);
-					newBoard[2][yPos] = (byte) (Piece.bishopId * side);
-					newBoard[5][yPos] = (byte) (Piece.bishopId * side);
-					newBoard[3][yPos] = (byte) (Piece.queenId * side);
+					if(!onlyPawns) {
+						newBoard[0][yPos] = (byte) (Piece.rookId * side);
+						newBoard[7][yPos] = (byte) (Piece.rookId * side);
+						newBoard[1][yPos] = (byte) (Piece.knightId * side);
+						newBoard[6][yPos] = (byte) (Piece.knightId * side);
+						newBoard[2][yPos] = (byte) (Piece.bishopId * side);
+						newBoard[5][yPos] = (byte) (Piece.bishopId * side);
+						newBoard[3][yPos] = (byte) (Piece.queenId * side);
+					}
 					newBoard[4][yPos] = (byte) (Piece.kingId * side);
 				}
 		);
