@@ -87,6 +87,7 @@ public class Controller {
 					selected.setSelected(false);
 					selected = null;
 					updateChessSquareImages();
+					Logger.log("Board evaluation: " + BoardEvaluator.evaluateBoard(game.getCurrentBoardState(), (byte) game.getTurn(), 0).getValue());
 					if(!canPlayerInteract()) {
 						AIMove();
 					}

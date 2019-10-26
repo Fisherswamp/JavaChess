@@ -1,18 +1,26 @@
 package main.java.game.evaluation;
 
+import main.java.debug.Logger;
 import main.java.game.Board;
 import main.java.game.moves.ChessMove;
 import main.java.game.pieces.Piece;
 import main.java.management.Utility;
 import main.java.ui.Window;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class BoardEvaluator {
 
-	private static int[][] pawnPositionMap = loadPawnPositionMap();
+	private static final int[][] pawnPositionMap = loadPawnPositionMap();
+	private static final double pawnMultiplierRatio = 200.0;
 
 	public static final int pawnValue = 1;
 	public static final int knightValue = 3;
@@ -79,7 +87,10 @@ public class BoardEvaluator {
 	}
 
 	private static double evaluatePawn(final byte[][] board, final byte x, final byte y){
-		return pawnValue * Utility.getSign(board[x][y]);
+		int sign = Utility.getSign(board[x][y]);
+		double value =  pawnValue;
+		value += (sign == 1 ? pawnPositionMap[x][y] : pawnPositionMap[x][7-y])/pawnMultiplierRatio;
+		return value*sign;
 	}
 	private static double evaluateBishop(final byte[][] board, final byte x, final byte y){
 		return bishopValue * Utility.getSign(board[x][y]);
@@ -98,13 +109,23 @@ public class BoardEvaluator {
 	}
 
 	private static int[][] loadPawnPositionMap() {
-
-		try(InputStream inputStream = Window.class.getResourceAsStream("main/resources/evaluation/pawn.json")) {
-
-		} catch (IOException | NullPointerException e) {
+		final int[][] pawnMap = new int[8][8];
+		final JSONParser parser = new JSONParser();
+		try(final InputStream inputStream = Window.class.getResourceAsStream("/evaluation/pawn.json")) {
+			final JSONArray pawnArray = (JSONArray) parser.parse(new InputStreamReader(inputStream));
+			int y = 0;
+			for (JSONArray pawnRowArray : (Iterable<JSONArray>) pawnArray) {
+				int x = 0;
+				for (Long pawnValue : (Iterable<Long>) pawnRowArray) {
+					pawnMap[x][y] = Math.toIntExact(pawnValue);
+					x++;
+				}
+				y++;
+			}
+		} catch (IOException | NullPointerException | ParseException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return pawnMap;
 	}
 
 
